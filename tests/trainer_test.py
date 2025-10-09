@@ -4,7 +4,7 @@ from torch import nn
 
 from src.dataset.dataset import TripletDataset
 from src.models.trainer import train
-from src.utils.transform import transform
+from src.utils.transform import get_transforms
 from torch.utils.data import DataLoader
 
 
@@ -25,8 +25,9 @@ def test_train():
             create_images(temp_train_dir, num_img=10, num_trash_img=0)
             create_images(temp_val_dir, num_img=10, num_trash_img=0)
             batch_size = 1
-            train_dataset = TripletDataset(temp_train_dir, transform)
-            val_dataset = TripletDataset(temp_val_dir, transform)
+            train_transform, base_transform = get_transforms()
+            train_dataset = TripletDataset(temp_train_dir, train_transform)
+            val_dataset = TripletDataset(temp_val_dir, base_transform)
 
             train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
             val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)

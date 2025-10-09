@@ -8,13 +8,16 @@ from torch import nn
 from torch.utils.data import DataLoader
 from src.dataset.dataset import TripletDataset
 from src.models.model import RecSSM
-from src.utils.transform import transform
+from src.utils.transform import get_transforms
 from src.models.trainer import train
 
 import hydra
 from omegaconf import DictConfig
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
+if device != "cuda":
+    raise SystemError("Sorry, ssm only support with gpu/cuda")
+
 print(f"Using device: {device}")
 
 @hydra.main(version_base=None, config_path=os.path.join(project_dir, "configs"), config_name="train")
@@ -22,14 +25,15 @@ def main(cfg : DictConfig):
     data_path = cfg["data_path"]
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
-
-    train_dataset = TripletDataset(os.path.join(data_path, "train"), transform)
-    test_dataset = TripletDataset(os.path.join(data_path, "test"), transform)
-    val_dataset = TripletDataset(os.path.join(data_path, "val"), transform)
+    imgsz = cfg["imgsz"]
+    train_transform, base_transform = get_transforms()
+    train_dataset = TripletDataset(os.path.join(data_path, "train"), train_transform, imgsz)
+    test_dataset = TripletDataset(os.path.join(data_path, "test"), base_transform, imgsz=imgsz)
+    val_dataset = TripletDataset(os.path.join(data_path, "val"), base_transform, imgsz=imgsz)
 
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=8)
 
     model = RecSSM().to(device)
 

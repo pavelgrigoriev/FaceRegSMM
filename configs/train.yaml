@@ -1,3 +1,4 @@
 data_path: "data/dataset"
 batch_size: 32
 epochs: 10
+imgsz: 640

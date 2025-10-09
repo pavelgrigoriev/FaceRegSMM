@@ -5,7 +5,7 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0.0
-        train_progress_bar = tqdm(train_dataloader, desc=f"Training... \nEpoch {epoch+1}/{epochs}", leave=False)
+        train_progress_bar = tqdm(train_dataloader, desc=f"Training... Epoch {epoch+1}/{epochs}", leave=False)
 
         for anchor, positive, negative in train_progress_bar:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
@@ -23,7 +23,7 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
 
         model.eval()
         total_val_loss = 0.0
-        val_progress_bar = tqdm(val_dataloader, desc=f"Validating... \nEpoch {epoch+1}/{epochs}", leave=False)
+        val_progress_bar = tqdm(val_dataloader, desc=f"Validating... Epoch {epoch+1}/{epochs}", leave=False)
 
         for anchor, positive, negative in val_progress_bar:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
