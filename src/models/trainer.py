@@ -1,7 +1,11 @@
+import os
+import torch
+import hydra
 from tqdm import tqdm
 
-def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device):
-
+def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device, patience=10):
+    count = 0 
+    best_val_loss = float('inf')
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0.0
@@ -36,5 +40,14 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
 
         avg_val_loss = total_val_loss / len(train_dataloader)
 
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            count = 0
+            torch.save(model.state_dict(), (os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "best_model.pt"))) # type: ignore
+        else:
+            count += 1
+        if count >= patience:
+            print(f"Early stopping on {epoch}")
+            break
         print(f"Epoch [{epoch+1}/{epochs}]  Train avg loss: {avg_train_loss:.6f} Val avg loss: {avg_val_loss:.6f}")
 
