@@ -35,8 +35,6 @@ results/
 
 # ML / deep learning specific
 checkpoints/
-models/
-saved_models/
 *.ckpt
 *.pt
 *.pth
