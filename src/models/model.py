@@ -10,6 +10,7 @@ class ConvBlock(nn.Module):
         self.norm = nn.BatchNorm2d(out_channels)
         self.act = nn.SiLU()
         self.pool = nn.MaxPool2d(4)
+
     def forward(self, x):
         return self.pool(self.act(self.norm(self.conv(x))))
     
@@ -28,6 +29,7 @@ class SSMBlock(nn.Module):
         self.conv = nn.Conv1d(in_channels, out_channels, 3, padding=1)
         self.norm = nn.BatchNorm1d(out_channels)
         self.act = nn.SiLU()
+        
     def forward(self, x):
         return self.act(self.norm(self.conv(self.ssm(x))))
         
@@ -43,7 +45,6 @@ class RecSSM(nn.Module):
         self.ssmblocks = nn.Sequential(
             SSMBlock(24, 12, 100, 50),
             SSMBlock(12, 6, 100, 50),
-            
             SSMBlock(6, 8, 100, 50),
         )
 
