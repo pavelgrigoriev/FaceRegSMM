@@ -1,14 +1,12 @@
-import numpy as np
-import torch
 from torch.utils.data import Dataset
 from pathlib import Path
 from PIL import Image
 import random 
-
 class TripletDataset(Dataset):
     def __init__(self, root_dir, transform=None):
+        extension_list = ["PNG", "png", "jpeg", "JPEG", "jpg", "JPG"]
         self.root = Path(root_dir)
-        self.images = list(self.root.glob("*.png"))
+        self.images = [f for ext in extension_list for f in self.root.glob(f"*.{ext}")]
         self.transform = transform
         
     def __getitem__(self, index):

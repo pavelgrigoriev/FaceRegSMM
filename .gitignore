@@ -32,6 +32,7 @@ outputs/
 logs/
 results/
 *.log
+.pytest_cache
 
 # ML / deep learning specific
 checkpoints/
