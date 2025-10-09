@@ -1,2 +1,57 @@
-/.vscode
-/__pycache__
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# VS Code
+.vscode/
+.vscode/*
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data files
+data/
+datasets/
+*.csv
+*.tsv
+*.h5
+*.hdf5
+*.npz
+*.pkl
+*.joblib
+
+# Output / results
+outputs/
+logs/
+results/
+*.log
+
+# ML / deep learning specific
+checkpoints/
+models/
+saved_models/
+*.ckpt
+*.pt
+*.pth
+*.weights
+*.meta
+
+# Environment
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Mac / Linux
+.DS_Store
+*.swp
