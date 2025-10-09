@@ -22,14 +22,20 @@ def main(cfg : DictConfig):
     data_path = cfg["data_path"]
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
-    dataset = TripletDataset(data_path, transform)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    train_dataset = TripletDataset(os.path.join(data_path, "train"), transform)
+    test_dataset = TripletDataset(os.path.join(data_path, "test"), transform)
+    val_dataset = TripletDataset(os.path.join(data_path, "val"), transform)
+
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, num_workers=8)
 
     model = RecSSM().to(device)
 
     optimizer = torch.optim.AdamW(model.parameters())
     loss_fn = nn.TripletMarginLoss(0.2)
-    train(epochs, model, dataloader,loss_fn,optimizer,device)
+    train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device)
 
 if __name__ == "__main__":
     main()
