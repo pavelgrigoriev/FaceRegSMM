@@ -24,8 +24,8 @@ def main(cfg : DictConfig):
     model_path = cfg["model_path"]
     imgsz = cfg["imgsz"]
 
-    first_img = Image.open(first_img_path)
-    second_img = Image.open(second_img_path)
+    first_img = Image.open(first_img_path).convert("RGB")
+    second_img = Image.open(second_img_path).convert("RGB")
     model = RecSSM().to(device)
     model.load_state_dict(torch.load(model_path, map_location=device))
 
