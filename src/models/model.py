@@ -47,7 +47,7 @@ class RecSSM(nn.Module):
             SSMBlock(12, 6, 100, 50),
             SSMBlock(6, 8, 100, 50),
         )
-
+        #TODO need rewrite
         self.avg = nn.AdaptiveMaxPool1d(16)
 
     def forward(self,x):

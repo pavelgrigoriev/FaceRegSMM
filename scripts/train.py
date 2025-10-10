@@ -1,5 +1,6 @@
 import os, sys
 
+
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
@@ -10,6 +11,7 @@ from src.dataset.dataset import TripletDataset
 from src.models.model import RecSSM
 from src.utils.transform import get_transforms
 from src.models.trainer import train
+from src.models.evaluate import evaluate
 
 import hydra
 from omegaconf import DictConfig
@@ -39,8 +41,10 @@ def main(cfg : DictConfig):
 
     optimizer = torch.optim.AdamW(model.parameters())
     loss_fn = nn.TripletMarginLoss(0.2)
-    train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device)
-
+    model = train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device)
+    loss = evaluate(model, test_dataloader, loss_fn, device)
+    print(loss)
+    
 if __name__ == "__main__":
     main()
 

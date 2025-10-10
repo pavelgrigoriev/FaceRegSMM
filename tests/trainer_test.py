@@ -34,4 +34,4 @@ def test_train():
 
             optimizer = torch.optim.AdamW(model.parameters())
             loss_fn = nn.TripletMarginLoss(0.2)
-            train(1, model, train_dataloader,val_dataloader,loss_fn,optimizer,device)
+            model = train(1, model, train_dataloader,val_dataloader,loss_fn,optimizer,device)

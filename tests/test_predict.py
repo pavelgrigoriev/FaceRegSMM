@@ -12,7 +12,7 @@ from dummy_blocks import DummySSMBlocks
 from PIL import Image
 from src.models.predict import predict
 
-def test_predic():
+def test_predict():
     device = "cpu"
     model = RecSSM()
     model.ssmblocks = DummySSMBlocks() # type: ignore

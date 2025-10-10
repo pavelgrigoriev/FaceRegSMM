@@ -56,3 +56,4 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
             break
         print(f"Epoch [{epoch+1}/{epochs}]  Train avg loss: {avg_train_loss:.6f} Val avg loss: {avg_val_loss:.6f}")
 
+    return model
