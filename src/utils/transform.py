@@ -1,7 +1,7 @@
 from torchvision.transforms import v2
 import torch
 
-def get_transforms():
+def get_transforms(imgsz=640):
     train_transform = v2.Compose([
         v2.ToImage(),
         v2.RandomApply([
@@ -31,12 +31,14 @@ def get_transforms():
             ratio=(0.3, 3.3),
             value="random" # type: ignore
         ),
+        v2.Resize((imgsz, imgsz), antialias=True),
         v2.Normalize(mean=[0.485, 0.456, 0.406],
                      std=[0.229, 0.224, 0.225]),
     ])
 
     base_transform = v2.Compose([
         v2.ToImage(),
+        v2.Resize((imgsz, imgsz), antialias=True),
         v2.ToDtype(torch.float32, scale=True),
         v2.Normalize(mean=[0.485, 0.456, 0.406],
                      std=[0.229, 0.224, 0.225]),

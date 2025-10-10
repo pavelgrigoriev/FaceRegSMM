@@ -1,0 +1,4 @@
+first_img_path: "data/dataset/test/00871.png"
+second_img_path: "data/dataset/test/00884.png"
+model_path: "outputs/2025-10-10/08-33-13/best_model.pt"
+imgsz: 640

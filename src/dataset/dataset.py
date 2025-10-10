@@ -1,10 +1,9 @@
-import torch
 from torch.utils.data import Dataset
 from pathlib import Path
 from PIL import Image
 import random
-
 from src.utils.transform import get_transforms
+
 class TripletDataset(Dataset):
     def __init__(self, root_dir, transform=None, imgsz=640):
         extension_list = ["PNG", "png", "jpeg", "JPEG", "jpg", "JPG"]
@@ -18,7 +17,7 @@ class TripletDataset(Dataset):
         positive_image = anchor_image.copy()
         if self.transform:
             anchor_image = self.transform(anchor_image)
-        pos_trans, _ = get_transforms()
+        pos_trans, _ = get_transforms(self.imgsz)
         positive_image = pos_trans(positive_image)
         neg_index = random.randint(0, len(self.images)-1)
         while neg_index == index:
