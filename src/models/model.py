@@ -43,9 +43,9 @@ class RecSSM(nn.Module):
             ConvBlock(12, 24)
         )
         self.ssmblocks = nn.Sequential(
-            SSMBlock(24, 12, 100, 50),
-            SSMBlock(12, 6, 100, 50),
-            SSMBlock(6, 8, 100, 50),
+            SSMBlock(24, 12, 4, 2),
+            SSMBlock(12, 6, 4, 2),
+            SSMBlock(6, 8, 4, 2),
         )
         #TODO need rewrite
         self.avg = nn.AdaptiveMaxPool1d(16)

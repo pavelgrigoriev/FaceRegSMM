@@ -37,7 +37,7 @@ def main(cfg : DictConfig) -> None:
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
     log.info(f"imgsz: {imgsz}")
-    train_transform, base_transform = get_transforms()
+    train_transform, base_transform = get_transforms(imgsz)
     train_dataset = TripletDataset(os.path.join(data_path, "train"), train_transform, imgsz)
     test_dataset = TripletDataset(os.path.join(data_path, "test"), base_transform, imgsz=imgsz)
     val_dataset = TripletDataset(os.path.join(data_path, "val"), base_transform, imgsz=imgsz)

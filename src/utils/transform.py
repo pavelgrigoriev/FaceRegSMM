@@ -13,12 +13,6 @@ def get_transforms(imgsz=640):
             )
         ], p=0.8),
         v2.RandomGrayscale(p=0.02),
-        v2.RandomResizedCrop(
-            size=(640, 640),
-            scale=(0.7, 1.0),
-            ratio=(3/4, 4/3),
-            antialias=True
-        ),
         v2.RandomHorizontalFlip(p=0.5),
         v2.RandomVerticalFlip(p=0.1),
         v2.RandomRotation(degrees=15), # type: ignore
