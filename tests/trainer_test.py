@@ -1,20 +1,21 @@
-import os, sys
+import os
+import sys
 import tempfile
+
+import torch
 from torch import nn
-
-from src.dataset.dataset import TripletDataset
-from src.models.trainer import train
-from src.utils.transform import get_transforms
 from torch.utils.data import DataLoader
-
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import torch
-from src.models.model import RecSSM
-from dummy_blocks import DummySSMBlocks
 from utils import create_images
+from src.models.model import RecSSM
+from src.models.trainer import train
+from dummy_blocks import DummySSMBlocks
+from src.utils.transform import get_transforms
+from src.dataset.dataset import TripletDataset
+
 
 def test_train():
     device = "cpu"

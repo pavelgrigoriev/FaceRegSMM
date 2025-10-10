@@ -1,5 +1,6 @@
-from pathlib import Path
 import random
+from pathlib import Path
+
 from PIL import Image
 import numpy as np
 

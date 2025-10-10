@@ -1,5 +1,5 @@
-from torchvision.transforms import v2
 import torch
+from torchvision.transforms import v2
 
 def get_transforms(imgsz=640):
     train_transform = v2.Compose([

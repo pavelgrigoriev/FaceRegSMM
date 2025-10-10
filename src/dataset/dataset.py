@@ -1,7 +1,8 @@
-from torch.utils.data import Dataset
-from pathlib import Path
-from PIL import Image
 import random
+from pathlib import Path
+
+from PIL import Image
+from torch.utils.data import Dataset
 from src.utils.transform import get_transforms
 
 class TripletDataset(Dataset):

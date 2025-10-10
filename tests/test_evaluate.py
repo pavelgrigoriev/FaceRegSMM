@@ -1,26 +1,19 @@
-import os, sys
+import os
+import sys
+import tempfile
 
-from src.models.evaluate import evaluate
-
-
-
+from torch import nn
+from torch.utils.data import DataLoader
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import numpy as np
-import torch.nn.functional as F
+from utils import create_images
 from src.models.model import RecSSM
 from dummy_blocks import DummySSMBlocks
-from PIL import Image
-from src.models.predict import predict
-import torch
+from src.models.evaluate import evaluate
 from src.dataset.dataset import TripletDataset
-from torch.utils.data import DataLoader
 from src.utils.transform import get_transforms
-from utils import create_images
-import tempfile
-from torch import nn
 
 def test_evaluate():
     device = "cpu"

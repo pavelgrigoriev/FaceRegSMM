@@ -1,23 +1,26 @@
-import os, sys
+import os
+import sys
+import logging
 
+
+import hydra
+import torch
+from torch import nn 
+from omegaconf import DictConfig
+from torch.utils.data import DataLoader
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import torch
-from torch import nn 
-from torch.utils.data import DataLoader
-from src.dataset.dataset import TripletDataset
 from src.models.model import RecSSM
-from src.utils.transform import get_transforms
 from src.models.trainer import train
 from src.models.evaluate import evaluate
-import logging
-import hydra
-from omegaconf import DictConfig
+from src.dataset.dataset import TripletDataset
+from src.utils.transform import get_transforms
 
 log = logging.getLogger(__name__)
 device = "cuda" if torch.cuda.is_available() else "cpu"
+
 if device != "cuda":
     raise SystemError("Sorry, ssm only support with gpu/cuda")
 

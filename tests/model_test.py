@@ -1,10 +1,10 @@
-import os, sys
-
+import os
+import sys
+import torch
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import torch
 from src.models.model import RecSSM
 from dummy_blocks import DummySSMBlocks
  

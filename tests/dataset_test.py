@@ -1,14 +1,15 @@
-import os, sys
+import os
+import sys
+import tempfile
+
+import numpy as np
+from torch.utils.data import DataLoader
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import numpy as np
-from src.dataset.dataset import TripletDataset
-
 from utils import create_images
-from torch.utils.data import DataLoader
-import tempfile
+from src.dataset.dataset import TripletDataset
 from src.utils.transform import get_transforms
 
 def test_dataset_loader():

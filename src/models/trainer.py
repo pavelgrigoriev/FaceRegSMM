@@ -1,8 +1,10 @@
-import logging
 import os
-import torch
+import logging
+
 import hydra
+import torch
 from tqdm import tqdm
+
 log = logging.getLogger(__name__)
 
 def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, scheduler, device, patience=15):

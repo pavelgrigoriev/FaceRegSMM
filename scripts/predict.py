@@ -1,16 +1,17 @@
-import os, sys
+import os
+import sys
 
+import hydra
+import torch
+from PIL import Image
+import torch.nn.functional as F
+from omegaconf import DictConfig
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
-import torch
-import torch.nn.functional as F
 from src.models.model import RecSSM
 from src.models.predict import predict
-from PIL import Image
-import hydra
-from omegaconf import DictConfig
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 if device != "cuda":

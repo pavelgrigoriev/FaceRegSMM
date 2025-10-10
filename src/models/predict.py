@@ -1,4 +1,5 @@
 import torch
+
 from src.utils.transform import get_transforms
 
 def predict(img, model, imgsz, device):

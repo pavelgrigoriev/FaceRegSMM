@@ -1,6 +1,8 @@
 import logging
+
 import torch
 from tqdm import tqdm
+
 log = logging.getLogger(__name__)
 
 def evaluate(model, test_dataloader, loss_fn, device):
