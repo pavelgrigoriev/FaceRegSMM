@@ -33,5 +33,6 @@ def test_train():
             val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
             optimizer = torch.optim.AdamW(model.parameters())
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
             loss_fn = nn.TripletMarginLoss(0.2)
-            model = train(1, model, train_dataloader,val_dataloader,loss_fn,optimizer,device)
+            model = train(1, model, train_dataloader,val_dataloader,loss_fn,optimizer,scheduler,device)
