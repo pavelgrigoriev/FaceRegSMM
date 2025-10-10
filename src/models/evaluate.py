@@ -1,5 +1,7 @@
+import logging
 import torch
 from tqdm import tqdm
+log = logging.getLogger(__name__)
 
 def evaluate(model, test_dataloader, loss_fn, device):
         model.eval()
@@ -17,6 +19,6 @@ def evaluate(model, test_dataloader, loss_fn, device):
 
         avg_test_loss = total_test_loss / len(test_dataloader)
 
-        print(f"Test avg loss: {avg_test_loss:.6f}")
+        log.info(f"Test avg loss: {avg_test_loss:.6f}")
 
         return avg_test_loss

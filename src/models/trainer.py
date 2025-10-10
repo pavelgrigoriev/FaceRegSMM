@@ -1,16 +1,17 @@
+import logging
 import os
 import torch
 import hydra
 from tqdm import tqdm
+log = logging.getLogger(__name__)
 
-def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, device, patience=10):
+def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, scheduler, device, patience=15):
     count = 0 
     best_val_loss = float('inf')
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0.0
         train_progress_bar = tqdm(train_dataloader, desc=f"Training... Epoch {epoch+1}/{epochs}", leave=False)
-
         for anchor, positive, negative in train_progress_bar:
             anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
             a_emb = model(anchor)
@@ -38,8 +39,8 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
                 total_val_loss += loss.item()
                 val_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-        avg_val_loss = total_val_loss / len(train_dataloader)
-
+        avg_val_loss = total_val_loss / len(val_dataloader)
+        scheduler.step(avg_val_loss)
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             count = 0
@@ -52,8 +53,9 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
         else:
             count += 1
         if count >= patience:
-            print(f"Early stopping on {epoch}")
+            log.info(f"Early stopping on {epoch}")
             break
-        print(f"Epoch [{epoch+1}/{epochs}]  Train avg loss: {avg_train_loss:.6f} Val avg loss: {avg_val_loss:.6f}")
+
+        log.info(f"Epoch [{epoch+1}/{epochs}]  Train avg loss: {avg_train_loss:.6f} Val avg loss: {avg_val_loss:.6f}")
 
     return model
