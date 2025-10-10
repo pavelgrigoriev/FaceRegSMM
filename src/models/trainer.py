@@ -43,7 +43,12 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             count = 0
-            torch.save(model.state_dict(), (os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "best_model.pt"))) # type: ignore
+            #TODO need improve
+            try:
+                torch.save(model.state_dict(), (os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "best_model.pt")))  # type: ignore
+            except:
+                pass  
+                
         else:
             count += 1
         if count >= patience:

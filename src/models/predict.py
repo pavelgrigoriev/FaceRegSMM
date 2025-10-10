@@ -1,5 +1,4 @@
 import torch
-from tqdm import tqdm
 from src.utils.transform import get_transforms
 
 def predict(img, model, imgsz, device):
