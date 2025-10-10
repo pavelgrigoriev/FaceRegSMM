@@ -28,15 +28,15 @@ def train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, d
         model.eval()
         total_val_loss = 0.0
         val_progress_bar = tqdm(val_dataloader, desc=f"Validating... Epoch {epoch+1}/{epochs}", leave=False)
-
-        for anchor, positive, negative in val_progress_bar:
-            anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
-            a_emb = model(anchor)
-            p_emb = model(positive)
-            n_emb = model(negative)
-            loss = loss_fn(a_emb, p_emb, n_emb)
-            total_val_loss += loss.item()
-            val_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
+        with torch.no_grad():    
+            for anchor, positive, negative in val_progress_bar:
+                anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+                a_emb = model(anchor)
+                p_emb = model(positive)
+                n_emb = model(negative)
+                loss = loss_fn(a_emb, p_emb, n_emb)
+                total_val_loss += loss.item()
+                val_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
         avg_val_loss = total_val_loss / len(train_dataloader)
 
