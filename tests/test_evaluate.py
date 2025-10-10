@@ -18,7 +18,7 @@ from src.utils.transform import get_transforms
 def test_evaluate():
     device = "cpu"
     with tempfile.TemporaryDirectory() as temp_test_dir:
-        model = RecSSM()
+        model = RecSSM(640)
         model.ssmblocks = DummySSMBlocks() # type: ignore
         create_images(temp_test_dir, num_img=10, num_trash_img=0)
         batch_size = 1

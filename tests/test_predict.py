@@ -13,7 +13,7 @@ from dummy_blocks import DummySSMBlocks
 
 def test_predict():
     device = "cpu"
-    model = RecSSM()
+    model = RecSSM(640)
     model.ssmblocks = DummySSMBlocks() # type: ignore
 
     first_img  = np.random.randint(0, 256, (640, 640, 3), dtype=np.uint8)

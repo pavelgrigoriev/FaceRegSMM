@@ -9,7 +9,7 @@ from src.models.model import RecSSM
 from dummy_blocks import DummySSMBlocks
  
 def test_model():
-    model = RecSSM()
+    model = RecSSM(640)
     model.ssmblocks = DummySSMBlocks() # type: ignore this need cause for ssm need only cuda
     sample_1 = torch.rand((1,3,640,640))
     output_1 = model(sample_1)

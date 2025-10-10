@@ -26,7 +26,7 @@ def main(cfg : DictConfig):
 
     first_img = Image.open(first_img_path).convert("RGB")
     second_img = Image.open(second_img_path).convert("RGB")
-    model = RecSSM().to(device)
+    model = RecSSM(imgsz).to(device)
     model.load_state_dict(torch.load(model_path, map_location=device))
 
     embedding1 = predict(first_img, model, imgsz, device)

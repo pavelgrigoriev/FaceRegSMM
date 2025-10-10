@@ -48,7 +48,7 @@ def main(cfg : DictConfig) -> None:
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=8)
     
-    model = RecSSM().to(device)
+    model = RecSSM(imgsz).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters())
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")

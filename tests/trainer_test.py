@@ -21,7 +21,7 @@ def test_train():
     device = "cpu"
     with tempfile.TemporaryDirectory() as temp_train_dir:
         with tempfile.TemporaryDirectory() as temp_val_dir:
-            model = RecSSM()
+            model = RecSSM(640)
             model.ssmblocks = DummySSMBlocks() # type: ignore
             create_images(temp_train_dir, num_img=10, num_trash_img=0)
             create_images(temp_val_dir, num_img=10, num_trash_img=0)

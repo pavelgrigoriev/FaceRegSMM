@@ -35,17 +35,18 @@ class SSMBlock(nn.Module):
         
 
 class RecSSM(nn.Module):
-    def __init__(self):
+    def __init__(self, imgsz):
         super().__init__()
         self.convblocks = nn.Sequential(
             ConvBlock(3, 6),
             ConvBlock(6, 12),
             ConvBlock(12, 24)
         )
+        scale = imgsz//32
         self.ssmblocks = nn.Sequential(
-            SSMBlock(24, 12, 4, 2),
-            SSMBlock(12, 6, 4, 2),
-            SSMBlock(6, 8, 4, 2),
+            SSMBlock(24, 12, scale, scale//2),
+            SSMBlock(12, 6, scale, scale//2),
+            SSMBlock(6, 8, scale, scale//2),
         )
         #TODO need rewrite
         self.avg = nn.AdaptiveMaxPool1d(16)
