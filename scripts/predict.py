@@ -22,15 +22,15 @@ def main(cfg : DictConfig):
     first_img_path = cfg["first_img_path"]
     second_img_path = cfg["second_img_path"]
     model_path = cfg["model_path"]
-    imgsz = cfg["imgsz"]
+    img_size = cfg["img_size"]
 
     first_img = Image.open(first_img_path).convert("RGB")
     second_img = Image.open(second_img_path).convert("RGB")
-    model = RecSSM(imgsz).to(device)
+    model = RecSSM(img_size).to(device)
     model.load_state_dict(torch.load(model_path, map_location=device))
 
-    embedding1 = predict(first_img, model, imgsz, device)
-    embedding2 = predict(second_img, model, imgsz, device)
+    embedding1 = predict(first_img, model, img_size, device)
+    embedding2 = predict(second_img, model, img_size, device)
     similarity = F.cosine_similarity(embedding1, embedding2)
     if similarity > 0.5:
         print("its ones men")

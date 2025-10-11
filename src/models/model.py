@@ -2,62 +2,56 @@ from torch import nn
 from mamba_ssm import Mamba2
 import torch.nn.functional as F
 
-# img size 3 640 640
-class ConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+class PatchEmbedding(nn.Module):
+    def __init__(self, img_size, patch_size=16, in_channels=3, embed_dim=128):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, (3,3), padding=1)
-        self.norm = nn.BatchNorm2d(out_channels)
-        self.act = nn.SiLU()
-        self.pool = nn.MaxPool2d(4)
+        self.img_size = img_size
+        self.patch_size = patch_size
+        
+        self.proj = nn.Conv2d(in_channels, embed_dim, 
+                             kernel_size=patch_size, 
+                             stride=patch_size)
+        self.norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x):
-        return self.pool(self.act(self.norm(self.conv(x))))
-    
-class SSMBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, d_model, headdim):
-        super().__init__()
-
-        self.ssm = Mamba2(
-            d_model=d_model, # Model dimension d_model
-            d_state=64,  # SSM state expansion factor, typically 64 or 128
-            d_conv=4,    # Local convolution width
-            expand=2,    # Block expansion factor
-            headdim=headdim
-
-        )
-        self.conv = nn.Conv1d(in_channels, out_channels, 3, padding=1)
-        self.norm = nn.BatchNorm1d(out_channels)
-        self.act = nn.SiLU()
-        
-    def forward(self, x):
-        return self.act(self.norm(self.conv(self.ssm(x))))
-        
+        x = self.proj(x)
+        x = x.flatten(2)
+        x = x.transpose(1, 2)
+        x = self.norm(x)
+        return x
 
 class RecSSM(nn.Module):
-    def __init__(self, imgsz):
+    def __init__(self, img_size=128, patch_size=16, embed_dim=128):
         super().__init__()
-        self.convblocks = nn.Sequential(
-            ConvBlock(3, 6),
-            ConvBlock(6, 12),
-            ConvBlock(12, 24)
-        )
-        scale = imgsz//32
-        self.ssmblocks = nn.Sequential(
-            SSMBlock(24, 12, scale, scale//2),
-            SSMBlock(12, 6, scale, scale//2),
-            SSMBlock(6, 8, scale, scale//2),
-        )
-        #TODO need rewrite
-        self.avg = nn.AdaptiveMaxPool1d(16)
-
-    def forward(self,x):
-        x = self.convblocks(x)
-        # batch 3*8 640/8 640/8
-        x = x.view(x.shape[0], x.shape[1], -1)
-        x = self.ssmblocks(x)
-        x = self.avg(x)
         
-        return  F.normalize(x.view(x.shape[0], -1), p=2, dim=1)
-        # b 128
+        self.patch_embed = PatchEmbedding(img_size, patch_size, 3, embed_dim)
+        
+        self.ssm_blocks = nn.ModuleList([
+            Mamba2(
+                d_model=embed_dim,
+                d_state=64,
+                d_conv=4,
+                expand=2,
+                headdim=32
+            ) for _ in range(4)
+        ])
+        
+        self.norms = nn.ModuleList([
+            nn.LayerNorm(embed_dim) for _ in range(4)
+        ])
+        
+        self.final_norm = nn.LayerNorm(embed_dim)
+        self.head = nn.Linear(embed_dim, 128)
 
+    def forward(self, x):
+        x = self.patch_embed(x)
+        
+        for ssm, norm in zip(self.ssm_blocks, self.norms):
+            x = x + ssm(norm(x))
+        
+        x = self.final_norm(x)
+        
+        x = x.mean(dim=1) 
+        
+        x = self.head(x)
+        return F.normalize(x, p=2, dim=1)

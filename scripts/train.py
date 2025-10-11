@@ -32,15 +32,15 @@ def main(cfg : DictConfig) -> None:
     data_path = cfg["data_path"]
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
-    imgsz = cfg["imgsz"]
+    img_size = cfg["img_size"]
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
-    log.info(f"imgsz: {imgsz}")
-    train_transform, base_transform = get_transforms(imgsz)
-    train_dataset = TripletDataset(os.path.join(data_path, "train"), train_transform, imgsz)
-    test_dataset = TripletDataset(os.path.join(data_path, "test"), base_transform, imgsz=imgsz)
-    val_dataset = TripletDataset(os.path.join(data_path, "val"), base_transform, imgsz=imgsz)
+    log.info(f"img_size: {img_size}")
+    train_transform, base_transform = get_transforms(img_size)
+    train_dataset = TripletDataset(os.path.join(data_path, "train"), train_transform, img_size)
+    test_dataset = TripletDataset(os.path.join(data_path, "test"), base_transform, img_size=img_size)
+    val_dataset = TripletDataset(os.path.join(data_path, "val"), base_transform, img_size=img_size)
     log.info(f"Len train_dataset: {len(train_dataset)}")
     log.info(f"Len test_dataset: {len(test_dataset)}")
     log.info(f"Len val_dataset: {len(val_dataset)}")
@@ -48,9 +48,9 @@ def main(cfg : DictConfig) -> None:
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=8)
     
-    model = RecSSM(imgsz).to(device)
+    model = RecSSM(img_size).to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters())
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
     loss_fn = nn.TripletMarginLoss(0.2)
     model = train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, scheduler,device)

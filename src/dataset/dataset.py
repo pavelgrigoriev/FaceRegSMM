@@ -6,8 +6,8 @@ from src.dataset.utils import load_image
 from src.utils.transform import get_transforms
 
 class TripletDataset(Dataset):
-    def __init__(self, root_dir, transform=None, imgsz=640):
-        self.imgsz = imgsz
+    def __init__(self, root_dir, transform=None, img_size=640):
+        self.img_size = img_size
         self.root = Path(root_dir)
         self.transform = transform
 
@@ -17,7 +17,6 @@ class TripletDataset(Dataset):
 
         self.valid_persons = [p for p, imgs in self.images_by_person.items() if len(imgs) >= 2]
 
-        self.transform, _ = get_transforms(self.imgsz)
         
     def __getitem__(self, index):
         anchor_person = random.choice(self.valid_persons)
@@ -29,9 +28,9 @@ class TripletDataset(Dataset):
         n_path = random.choice(self.images_by_person[negative_person])
 
 
-        anchor_image = load_image(a_path, self.imgsz, self.transform)
-        positive_image = load_image(p_path, self.imgsz, self.transform)
-        negative_image = load_image(n_path, self.imgsz, self.transform)
+        anchor_image = load_image(a_path, self.img_size, self.transform)
+        positive_image = load_image(p_path, self.img_size, self.transform)
+        negative_image = load_image(n_path, self.img_size, self.transform)
 
         return anchor_image, positive_image, negative_image
     
