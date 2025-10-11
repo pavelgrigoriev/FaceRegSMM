@@ -4,6 +4,7 @@ import os
 import hydra
 import torch
 from PIL import Image
+import torchvision.utils as vutils
 
 def image_from_dataloader(img):
     mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
@@ -15,9 +16,18 @@ def image_from_dataloader(img):
     return img
 
 def save_samples(a,p,n):
-    a_img = Image.fromarray(image_from_dataloader(a[0,:,:,:]))
-    a_img.save(os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "anchor_sample.jpg")) # type: ignore
-    p_img = Image.fromarray(image_from_dataloader(p[0,:,:,:]))
-    p_img.save(os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "positive_sample.jpg")) # type: ignore
-    n_img = Image.fromarray(image_from_dataloader(n[0,:,:,:]))
-    n_img.save(os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "negative_sample.jpg"))  # type: ignore
+
+
+    save_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir  # type: ignore
+    os.makedirs(save_dir, exist_ok=True)
+    
+    for name, batch in zip(["anchor", "positive", "negative"], [a, p, n]):
+        mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+        std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+        batch = batch * std + mean
+        batch = torch.clamp(batch, 0, 1)
+
+        grid = vutils.make_grid(batch, nrow=4)
+        grid_img = (grid.permute(1, 2, 0).numpy() * 255).astype('uint8')
+        img = Image.fromarray(grid_img)
+        img.save(os.path.join(save_dir, f"{name}_batch.jpg"))
