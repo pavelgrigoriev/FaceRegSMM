@@ -3,10 +3,9 @@ from pathlib import Path
 
 from torch.utils.data import Dataset
 from src.dataset.utils import load_image
-from src.utils.transform import get_transforms
 
 class TripletDataset(Dataset):
-    def __init__(self, root_dir, transform=None, img_size=640):
+    def __init__(self, root_dir, transform=None, img_size=128):
         self.img_size = img_size
         self.root = Path(root_dir)
         self.transform = transform

@@ -1,4 +1,8 @@
 first_img_path: ""
 second_img_path: ""
 model_path: ""
-imgsz: 128
+img_size: 128
+hydra:
+  run:
+    dir: .
+  output_subdir: null
