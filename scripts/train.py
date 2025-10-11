@@ -14,6 +14,7 @@ sys.path.append(project_dir)
 
 from src.models.model import RecSSM
 from src.models.trainer import train
+from scripts.utils import save_samples
 from src.models.evaluate import evaluate
 from src.dataset.dataset import TripletDataset
 from src.utils.transform import get_transforms
@@ -53,6 +54,11 @@ def main(cfg : DictConfig) -> None:
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
     loss_fn = nn.TripletMarginLoss(0.2)
+    train_iter = iter(train_dataloader)
+    a,p,n = next(train_iter)
+
+    save_samples(a,p,n)
+
     model = train(epochs, model, train_dataloader, val_dataloader, loss_fn, optimizer, scheduler,device)
     loss = evaluate(model, test_dataloader, loss_fn, device)
     log.info(f"Loss on test set: {loss}")
