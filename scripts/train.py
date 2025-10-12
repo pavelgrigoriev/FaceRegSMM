@@ -34,10 +34,12 @@ def main(cfg : DictConfig) -> None:
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
     img_size = cfg["img_size"]
+    lr = cfg["lr"]
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
     log.info(f"img_size: {img_size}")
+    log.info(f"lr: {lr}")
     train_transform, base_transform = get_transforms(img_size)
     train_dataset = TripletDataset(os.path.join(data_path, "train"), train_transform, img_size)
     test_dataset = TripletDataset(os.path.join(data_path, "test"), base_transform, img_size=img_size)
@@ -51,7 +53,7 @@ def main(cfg : DictConfig) -> None:
     
     model = RecSSM(img_size).to(device)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.001)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, "min")
     loss_fn = nn.TripletMarginLoss(0.2)
     train_iter = iter(train_dataloader)
