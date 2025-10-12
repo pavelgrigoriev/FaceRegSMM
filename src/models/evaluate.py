@@ -5,13 +5,20 @@ from tqdm import tqdm
 
 log = logging.getLogger(__name__)
 
+
 def evaluate(model, test_dataloader, loss_fn, device):
     model.eval()
     total_test_loss = 0.0
-    test_progress_bar = tqdm(test_dataloader, desc=f"Validating on test set...", leave=False)
-    with torch.no_grad():    
+    test_progress_bar = tqdm(
+        test_dataloader, desc=f"Validating on test set...", leave=False
+    )
+    with torch.no_grad():
         for anchor, positive, negative in test_progress_bar:
-            anchor, positive, negative = anchor.to(device), positive.to(device), negative.to(device)
+            anchor, positive, negative = (
+                anchor.to(device),
+                positive.to(device),
+                negative.to(device),
+            )
             a_emb = model(anchor)
             p_emb = model(positive)
             n_emb = model(negative)
