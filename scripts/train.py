@@ -31,6 +31,8 @@ log.info(f"Using device: {device}")
 @hydra.main(version_base=None, config_path=os.path.join(project_dir, "configs"), config_name="train")
 def main(cfg : DictConfig) -> None:
     data_path = cfg["data_path"]
+    if data_path == "":
+        raise ValueError("Please check your data path")
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
     img_size = cfg["img_size"]
