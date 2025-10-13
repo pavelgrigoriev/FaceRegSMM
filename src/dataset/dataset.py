@@ -38,4 +38,4 @@ class TripletDataset(Dataset):
         return anchor_image, positive_image, negative_image
 
     def __len__(self):
-        return len(self.valid_persons) * 10
+        return len(self.valid_persons) * 30
