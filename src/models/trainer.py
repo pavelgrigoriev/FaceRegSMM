@@ -3,7 +3,7 @@ import os
 
 import hydra
 import torch
-from pytorch_metric_learning import losses, miners
+from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -15,15 +15,19 @@ def train(
     train_dataloader,
     val_dataloader,
     loss_fn,
+    miner,
     optimizer,
     scheduler,
     device,
     patience=15,
 ):
-    loss_fn = losses.TripletMarginLoss(margin=0.2)
-    miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="semihard")
     count = 0
-    best_val_loss = float("inf")
+
+    best_val_metric = 0.0
+    accuracy_calculator = AccuracyCalculator(
+        include=("precision_at_1", "r_precision", "mean_average_precision_at_r"),
+        k="max_bin_count",
+    )
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0.0
@@ -31,12 +35,11 @@ def train(
             train_dataloader, desc=f"Training... Epoch {epoch+1}/{epochs}", leave=False
         )
         for images, labels in train_progress_bar:
-            images, labels = images.to(device), labels.to(device)
+            images, labels = images.to(device), labels
             optimizer.zero_grad()
             embeddings = model(images)
-            hard_triplets = miner(embeddings, labels)
-            loss = loss_fn(embeddings, labels, hard_triplets)
-            optimizer.zero_grad()
+            triplets = miner(embeddings, labels)
+            loss = loss_fn(embeddings, labels, triplets)
             loss.backward()
             optimizer.step()
             total_train_loss += loss.item()
@@ -45,38 +48,71 @@ def train(
         avg_train_loss = total_train_loss / len(train_dataloader)
 
         model.eval()
-        total_val_loss = 0.0
         val_progress_bar = tqdm(
             val_dataloader, desc=f"Validating... Epoch {epoch+1}/{epochs}", leave=False
         )
+        emb = []
+        lbs = []
         with torch.no_grad():
             for images, labels in val_progress_bar:
                 images, labels = images.to(device), labels.to(device)
 
                 embeddings = model(images)
-                hard_triplets = miner(embeddings, labels)
-                loss = loss_fn(embeddings, labels, hard_triplets)
-                total_val_loss += loss.item()
-                val_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
+                emb.append(embeddings.cpu())
+                lbs.append(labels)
 
-        avg_val_loss = total_val_loss / len(val_dataloader)
+        val_embeddings = torch.cat(emb)
+        val_labels = torch.cat(lbs).cpu()
+        val_embeddings = torch.nn.functional.normalize(val_embeddings, p=2, dim=1)
+
+        metrics = accuracy_calculator.get_accuracy(
+            val_embeddings.numpy(),
+            val_labels.numpy(),
+            val_embeddings.numpy(),
+            val_labels.numpy(),
+            ref_includes_query=True,
+        )
+
+        recall_at_1 = metrics["precision_at_1"]
+        r_precision = metrics["r_precision"]
+        map_at_r = metrics["mean_average_precision_at_r"]
+
         scheduler.step()
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
+
+        if recall_at_1 > best_val_metric:
+            best_val_metric = recall_at_1
             count = 0
             try:
-                torch.save(model.state_dict(), (os.path.join(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir, "best_model.pt")))  # type: ignore
-            except:
-                log.error("Error saving the model.")
-
+                save_path = os.path.join(
+                    hydra.core.hydra_config.HydraConfig.get().runtime.output_dir,  # type: ignore
+                    "best_model.pt",
+                )
+                torch.save(
+                    {
+                        "epoch": epoch,
+                        "model_state_dict": model.state_dict(),
+                        "optimizer_state_dict": optimizer.state_dict(),
+                        "recall_at_1": recall_at_1,
+                        "map_at_r": map_at_r,
+                    },
+                    save_path,
+                )
+                log.info(f"Saved best model with Recall@1={recall_at_1:.4f}")
+            except Exception as e:
+                log.error(f"Error saving the model: {e}")
         else:
             count += 1
+
         if count >= patience:
-            log.info(f"Early stopping on {epoch}")
+            log.info(f"Early stopping at epoch {epoch+1}")
             break
 
         log.info(
-            f"Epoch [{epoch+1}/{epochs}]  Train avg loss: {avg_train_loss:.6f} Val avg loss: {avg_val_loss:.6f}"
+            f"Epoch [{epoch+1}/{epochs}] | "
+            f"Train Loss: {avg_train_loss:.4f} | "
+            f"Recall@1: {recall_at_1:.4f} | "
+            f"R-Precision: {r_precision:.4f} | "
+            f"MAP@R: {map_at_r:.4f}"
         )
 
     return model

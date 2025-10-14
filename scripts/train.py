@@ -5,6 +5,7 @@ import sys
 import hydra
 import torch
 from omegaconf import DictConfig
+from pytorch_metric_learning import losses, miners
 from pytorch_metric_learning.samplers import MPerClassSampler
 from torch import nn
 from torch.utils.data import DataLoader
@@ -64,25 +65,27 @@ def main(cfg: DictConfig) -> None:
         train_dataset,
         batch_size=batch_size,
         sampler=sampler,
-        num_workers=8,
+        num_workers=10,
         pin_memory=True,
+        drop_last=True,
     )
-    labels = [val_dataset.person_to_id[p.parent.name] for p in val_dataset.paths]
-    sampler = MPerClassSampler(labels, m=2, length_before_new_iter=len(labels))
     val_dataloader = DataLoader(
-        val_dataset, batch_size=batch_size, sampler=sampler, num_workers=8
+        val_dataset,
+        batch_size=batch_size,
+        num_workers=10,
+        pin_memory=True,
+        persistent_workers=True,
     )
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=8)
     model = RecSSM(img_size).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
-    loss_fn = nn.TripletMarginLoss(0.2)
+    loss_fn = losses.TripletMarginLoss(margin=0.2)
+    miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
     train_iter = iter(train_dataloader)
-    # a, p, n = next(train_iter)
-
-    # save_samples(a, p, n)
+    imgs, _ = next(train_iter)
+    save_samples(imgs)
 
     model = train(
         epochs,
@@ -90,12 +93,12 @@ def main(cfg: DictConfig) -> None:
         train_dataloader,
         val_dataloader,
         loss_fn,
+        miner,
         optimizer,
         scheduler,
         device,
     )
-    # loss = evaluate(model, test_dataloader, loss_fn, device)
-    # log.info(f"Loss on test set: {loss}")
+    evaluate(model, test_dataloader, device)
 
 
 if __name__ == "__main__":
