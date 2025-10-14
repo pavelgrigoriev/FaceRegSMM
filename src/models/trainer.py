@@ -3,6 +3,7 @@ import os
 
 import hydra
 import torch
+from pytorch_metric_learning import losses, miners
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ def train(
     device,
     patience=15,
 ):
+    loss_fn = losses.TripletMarginLoss(margin=0.2)
+    miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="semihard")
     count = 0
     best_val_loss = float("inf")
     for epoch in range(epochs):
@@ -27,16 +30,12 @@ def train(
         train_progress_bar = tqdm(
             train_dataloader, desc=f"Training... Epoch {epoch+1}/{epochs}", leave=False
         )
-        for anchor, positive, negative in train_progress_bar:
-            anchor, positive, negative = (
-                anchor.to(device),
-                positive.to(device),
-                negative.to(device),
-            )
-            a_emb = model(anchor)
-            p_emb = model(positive)
-            n_emb = model(negative)
-            loss = loss_fn(a_emb, p_emb, n_emb)
+        for images, labels in train_progress_bar:
+            images, labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
+            embeddings = model(images)
+            hard_triplets = miner(embeddings, labels)
+            loss = loss_fn(embeddings, labels, hard_triplets)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -51,21 +50,17 @@ def train(
             val_dataloader, desc=f"Validating... Epoch {epoch+1}/{epochs}", leave=False
         )
         with torch.no_grad():
-            for anchor, positive, negative in val_progress_bar:
-                anchor, positive, negative = (
-                    anchor.to(device),
-                    positive.to(device),
-                    negative.to(device),
-                )
-                a_emb = model(anchor)
-                p_emb = model(positive)
-                n_emb = model(negative)
-                loss = loss_fn(a_emb, p_emb, n_emb)
+            for images, labels in val_progress_bar:
+                images, labels = images.to(device), labels.to(device)
+
+                embeddings = model(images)
+                hard_triplets = miner(embeddings, labels)
+                loss = loss_fn(embeddings, labels, hard_triplets)
                 total_val_loss += loss.item()
                 val_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
         avg_val_loss = total_val_loss / len(val_dataloader)
-        scheduler.step(avg_val_loss)
+        scheduler.step()
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss
             count = 0
