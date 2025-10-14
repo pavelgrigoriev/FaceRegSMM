@@ -1,41 +1,38 @@
+# dataset.py
+
 import random
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 from torch.utils.data import Dataset
 
 from src.dataset.utils import load_image
 
 
-class TripletDataset(Dataset):
-    def __init__(self, root_dir, transform=None, img_size=128):
-        self.img_size = img_size
+class PersonDataset(Dataset):
+    def __init__(
+        self,
+        root_dir,
+        transform,
+        img_size,
+        person_to_id,
+        image_paths,
+    ):
+        super().__init__()
         self.root = Path(root_dir)
         self.transform = transform
-        self.random = random.Random(123)
-        self.person_dirs = [p for p in self.root.iterdir() if p.is_dir()]
+        self.img_size = img_size
+        self.person_to_id = person_to_id
 
-        self.images_by_person = {p: list(p.glob("*")) for p in self.person_dirs}
-
-        self.valid_persons = [
-            p for p, imgs in self.images_by_person.items() if len(imgs) >= 2
-        ]
+        self.paths = image_paths
 
     def __getitem__(self, index):
-        anchor_person = self.random.choice(self.valid_persons)
-        imgs = self.images_by_person[anchor_person]
+        img_path = self.paths[index]
+        person_name = img_path.parent.name
+        label = self.person_to_id.get(person_name, -1)
 
-        a_path, p_path = self.random.sample(imgs, 2)
-
-        negative_person = self.random.choice(
-            [p for p in self.person_dirs if p != anchor_person]
-        )
-        n_path = self.random.choice(self.images_by_person[negative_person])
-
-        anchor_image = load_image(a_path, self.img_size, self.transform)
-        positive_image = load_image(p_path, self.img_size, self.transform)
-        negative_image = load_image(n_path, self.img_size, self.transform)
-
-        return anchor_image, positive_image, negative_image
+        image = load_image(img_path, self.img_size, self.transform)
+        return image, label
 
     def __len__(self):
-        return len(self.valid_persons) * 30
+        return len(self.paths)

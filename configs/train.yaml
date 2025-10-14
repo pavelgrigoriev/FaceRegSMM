@@ -1,5 +1,15 @@
 data_path: ""
+epochs: 100
 batch_size: 32
-epochs: 10
 img_size: 128
 lr: 0.001
+
+min_images_for_split: 2   
+val_ratio: 0.15
+test_ratio: 0.15
+seed: 42
+
+embedding_size: 128
+
+arcface_margin: 28.6  
+arcface_scale: 64.0

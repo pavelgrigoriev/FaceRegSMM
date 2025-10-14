@@ -1,33 +1,53 @@
-import logging
-
 import torch
 from tqdm import tqdm
 
-log = logging.getLogger(__name__)
 
-
-def evaluate(model, test_dataloader, loss_fn, device):
+def evaluate(model, test_dataloader, loss_fn, device, miner=None):
+    """
+    Evaluate model on test set
+    """
     model.eval()
     total_test_loss = 0.0
+
     test_progress_bar = tqdm(
-        test_dataloader, desc=f"Validating on test set...", leave=False
+        test_dataloader, desc="Evaluating on test set", leave=False
     )
+
     with torch.no_grad():
-        for anchor, positive, negative in test_progress_bar:
-            anchor, positive, negative = (
-                anchor.to(device),
-                positive.to(device),
-                negative.to(device),
-            )
-            a_emb = model(anchor)
-            p_emb = model(positive)
-            n_emb = model(negative)
-            loss = loss_fn(a_emb, p_emb, n_emb)
+        for images, labels in test_progress_bar:
+            images, labels = images.to(device), labels.to(device)
+
+            embeddings = model(images)
+
+            if miner is not None:
+                hard_pairs = miner(embeddings, labels)
+                loss = loss_fn(embeddings, labels, hard_pairs)
+            else:
+                loss = loss_fn(embeddings, labels)
+
             total_test_loss += loss.item()
             test_progress_bar.set_postfix({"loss": f"{loss.item():.4f}"})
 
     avg_test_loss = total_test_loss / len(test_dataloader)
-
-    log.info(f"Test avg loss: {avg_test_loss:.6f}")
-
     return avg_test_loss
+
+
+def extract_embeddings(model, dataloader, device):
+    model.eval()
+    all_embeddings = []
+    all_labels = []
+
+    with torch.no_grad():
+        for images, labels in tqdm(dataloader, desc="Extracting embeddings"):
+            images = images.to(device)
+
+            # Получаем embeddings
+            embeddings = model(images)
+
+            all_embeddings.append(embeddings.cpu())
+            all_labels.append(labels)
+
+    all_embeddings = torch.cat(all_embeddings, dim=0)
+    all_labels = torch.cat(all_labels, dim=0)
+
+    return all_embeddings, all_labels
