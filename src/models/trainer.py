@@ -2,9 +2,9 @@ import logging
 import os
 
 import hydra
-import tensorboard
 import torch
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def train(
     device,
     patience=15,
 ):
-    writer = tensorboard.SummaryWriter(
+    writer = SummaryWriter(
         log_dir=hydra.core.hydra_config.HydraConfig.get().runtime.output_dir  # type: ignore
     )
     best_val_metric = 0.0

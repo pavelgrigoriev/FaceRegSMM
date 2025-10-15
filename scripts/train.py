@@ -3,12 +3,11 @@ import os
 import sys
 
 import hydra
+import pytorch_warmup as warmup
 import torch
 from omegaconf import DictConfig
 from pytorch_metric_learning import losses, miners
 from pytorch_metric_learning.samplers import MPerClassSampler
-import pytorch_warmup as warmup
-
 from torch import nn
 from torch.utils.data import DataLoader
 
