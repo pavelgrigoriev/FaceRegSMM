@@ -7,6 +7,8 @@ import torch
 from omegaconf import DictConfig
 from pytorch_metric_learning import losses, miners
 from pytorch_metric_learning.samplers import MPerClassSampler
+import pytorch_warmup as warmup
+
 from torch import nn
 from torch.utils.data import DataLoader
 
@@ -83,6 +85,8 @@ def main(cfg: DictConfig) -> None:
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, epochs, eta_min=1e-6
     )
+    warmup_scheduler = warmup.UntunedLinearWarmup(optimizer)
+
     loss_fn = losses.TripletMarginLoss(margin=0.2)
     miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
     train_iter = iter(train_dataloader)
@@ -98,6 +102,7 @@ def main(cfg: DictConfig) -> None:
         miner,
         optimizer,
         scheduler,
+        warmup_scheduler,
         device,
     )
     evaluate(model, test_dataloader, device)

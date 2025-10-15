@@ -19,10 +19,13 @@ def train(
     miner,
     optimizer,
     scheduler,
+    warmup_scheduler,
     device,
     patience=15,
 ):
-
+    writer = tensorboard.SummaryWriter(
+        log_dir=hydra.core.hydra_config.HydraConfig.get().runtime.output_dir  # type: ignore
+    )
     best_val_metric = 0.0
     accuracy_calculator = AccuracyCalculator(
         include=("precision_at_1", "r_precision", "mean_average_precision_at_r"),
@@ -77,7 +80,13 @@ def train(
         r_precision = metrics["r_precision"]
         map_at_r = metrics["mean_average_precision_at_r"]
 
-        scheduler.step()
+        writer.add_scalar("Loss/Train", avg_train_loss, epoch + 1)
+        writer.add_scalar("Recall@1/Val", recall_at_1, epoch + 1)
+        writer.add_scalar("R-Precision/Val", r_precision, epoch + 1)
+        writer.add_scalar("MAP@R/Val", map_at_r, epoch + 1)
+        writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], epoch + 1)
+        with warmup_scheduler.dampening():
+            scheduler.step()
 
         if recall_at_1 > best_val_metric:
             best_val_metric = recall_at_1
@@ -94,6 +103,8 @@ def train(
                         "optimizer_state_dict": optimizer.state_dict(),
                         "recall_at_1": recall_at_1,
                         "map_at_r": map_at_r,
+                        "r_precision": r_precision,
+                        "lr": optimizer.param_groups[0]["lr"],
                     },
                     save_path,
                 )
