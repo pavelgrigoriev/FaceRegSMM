@@ -22,7 +22,7 @@ class PersonDataset(Dataset):
         person_name = img_path.parent.name
         label = self.person_to_id[person_name]
 
-        image = load_image(img_path, self.img_size, self.transform)
+        image = load_image(img_path, self.transform)
         return image, label
 
     def __len__(self):

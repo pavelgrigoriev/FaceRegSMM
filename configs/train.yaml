@@ -3,4 +3,6 @@ batch_size: 32
 epochs: 10
 img_size: 128
 lr: 0.003
+eta_min: 1e-6
 warmup_period: 10
+num_workers: 8

@@ -38,18 +38,26 @@ def main(cfg: DictConfig) -> None:
     data_path = cfg["data_path"]
     if data_path == "":
         raise ValueError("Please check your data path")
+
     epochs = cfg["epochs"]
     batch_size = cfg["batch_size"]
     img_size = cfg["img_size"]
     lr = cfg["lr"]
+    num_workers = cfg["num_workers"]
     warmup_period = cfg["warmup_period"]
+    eta_min = cfg["eta_min"]
+
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
     log.info(f"img_size: {img_size}")
     log.info(f"lr: {lr}")
     log.info(f"warmup_period: {warmup_period}")
+    log.info(f"num_workers: {num_workers}")
+    log.info(f"eta_min: {eta_min}")
+
     train_transform, base_transform = get_transforms(img_size)
+
     train_dataset = PersonDataset(
         os.path.join(data_path, "train"), train_transform, img_size
     )
@@ -59,37 +67,42 @@ def main(cfg: DictConfig) -> None:
     test_dataset = PersonDataset(
         os.path.join(data_path, "test"), base_transform, img_size=img_size
     )
+
     log.info(f"Len train_dataset: {len(train_dataset)}")
     log.info(f"Len test_dataset: {len(test_dataset)}")
     log.info(f"Len val_dataset: {len(val_dataset)}")
+
     labels = [train_dataset.person_to_id[p.parent.name] for p in train_dataset.paths]
     sampler = MPerClassSampler(labels, m=2, length_before_new_iter=len(labels))
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         sampler=sampler,
-        num_workers=10,
+        num_workers=num_workers,
         pin_memory=True,
         drop_last=True,
+        persistent_workers=True,
+        prefetch_factor=4,
     )
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=batch_size,
-        num_workers=10,
+        num_workers=num_workers,
         pin_memory=True,
         persistent_workers=True,
+        prefetch_factor=4,
     )
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
-    model = RecSSM(img_size).to(device)
 
+    model = RecSSM(img_size).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, epochs - warmup_period, eta_min=1e-6
     )
     warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
-
     loss_fn = losses.TripletMarginLoss(margin=0.2)
     miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
+
     train_iter = iter(train_dataloader)
     imgs, _ = next(train_iter)
     save_samples(imgs)
@@ -107,6 +120,7 @@ def main(cfg: DictConfig) -> None:
         warmup_period,
         device,
     )
+
     evaluate(model, test_dataloader, device)
 
 

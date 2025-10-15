@@ -1,9 +1,9 @@
 from PIL import Image
 
 
-def load_image(path, img_size, transform):
+def load_image(path, transform):
     try:
-        img = Image.open(path).convert("RGB").resize((img_size, img_size))
+        img = Image.open(path)
         if transform:
             img = transform(img)
     except Exception as e:
