@@ -20,6 +20,7 @@ def train(
     optimizer,
     scheduler,
     warmup_scheduler,
+    warmup_period,
     device,
     patience=15,
 ):
@@ -86,7 +87,8 @@ def train(
         writer.add_scalar("MAP@R/Val", map_at_r, epoch + 1)
         writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], epoch + 1)
         with warmup_scheduler.dampening():
-            scheduler.step()
+            if warmup_scheduler.last_step + 1 >= warmup_period:
+                scheduler.step()
 
         if recall_at_1 > best_val_metric:
             best_val_metric = recall_at_1

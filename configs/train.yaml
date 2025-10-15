@@ -3,3 +3,4 @@ batch_size: 32
 epochs: 10
 img_size: 128
 lr: 0.003
+warmup_period: 10

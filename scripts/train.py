@@ -42,11 +42,13 @@ def main(cfg: DictConfig) -> None:
     batch_size = cfg["batch_size"]
     img_size = cfg["img_size"]
     lr = cfg["lr"]
+    warmup_period = cfg["warmup_period"]
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
     log.info(f"img_size: {img_size}")
     log.info(f"lr: {lr}")
+    log.info(f"warmup_period: {warmup_period}")
     train_transform, base_transform = get_transforms(img_size)
     train_dataset = PersonDataset(
         os.path.join(data_path, "train"), train_transform, img_size
@@ -82,9 +84,9 @@ def main(cfg: DictConfig) -> None:
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, epochs, eta_min=1e-6
+        optimizer, epochs - warmup_period, eta_min=1e-6
     )
-    warmup_scheduler = warmup.UntunedLinearWarmup(optimizer)
+    warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
 
     loss_fn = losses.TripletMarginLoss(margin=0.2)
     miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
@@ -102,6 +104,7 @@ def main(cfg: DictConfig) -> None:
         optimizer,
         scheduler,
         warmup_scheduler,
+        warmup_period,
         device,
     )
     evaluate(model, test_dataloader, device)
