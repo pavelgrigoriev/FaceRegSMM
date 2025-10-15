@@ -73,6 +73,7 @@ def main(cfg: DictConfig) -> None:
 
     labels = [train_dataset.person_to_id[p.parent.name] for p in train_dataset.paths]
     sampler = MPerClassSampler(labels, m=2, length_before_new_iter=len(labels))
+
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=batch_size,
@@ -83,6 +84,7 @@ def main(cfg: DictConfig) -> None:
         persistent_workers=True,
         prefetch_factor=4,
     )
+
     val_dataloader = DataLoader(
         val_dataset,
         batch_size=batch_size,
@@ -91,7 +93,15 @@ def main(cfg: DictConfig) -> None:
         persistent_workers=True,
         prefetch_factor=4,
     )
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, num_workers=8)
+
+    test_dataloader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        pin_memory=True,
+        persistent_workers=True,
+        prefetch_factor=4,
+    )
 
     model = RecSSM(img_size).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)

@@ -34,7 +34,7 @@ def main(cfg: DictConfig):
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model file not found: {model_path}")
     img_size = cfg["img_size"]
-
+    similarity_threshold = cfg["similarity_threshold"]
     first_img = Image.open(first_img_path).convert("RGB")
     second_img = Image.open(second_img_path).convert("RGB")
     model = RecSSM(img_size).to(device)
@@ -45,7 +45,7 @@ def main(cfg: DictConfig):
     embedding1 = predict(first_img, model, img_size, device)
     embedding2 = predict(second_img, model, img_size, device)
     similarity = F.cosine_similarity(embedding1, embedding2)
-    if similarity > 0.5:
+    if similarity > similarity_threshold:
         print("its ones men")
     else:
         print("different men")
