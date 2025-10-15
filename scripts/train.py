@@ -8,7 +8,6 @@ import torch
 from omegaconf import DictConfig
 from pytorch_metric_learning import losses, miners
 from pytorch_metric_learning.samplers import MPerClassSampler
-from torch import nn
 from torch.utils.data import DataLoader
 
 project_dir = os.path.dirname(os.path.dirname(__file__))

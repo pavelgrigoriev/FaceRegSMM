@@ -1,4 +1,3 @@
-import random
 from pathlib import Path
 
 from torch.utils.data import Dataset
@@ -11,7 +10,10 @@ class PersonDataset(Dataset):
         self.root = Path(root_dir)
         self.transform = transform
         self.img_size = img_size
-        self.paths = list(self.root.glob("*/*"))
+        extension_list = ["PNG", "png", "jpeg", "JPEG", "jpg", "JPG"]
+        self.paths = sorted(
+            [p for p in self.root.rglob("*") if p.suffix[1:] in extension_list]
+        )
         self.person_dirs = sorted([p for p in self.root.iterdir() if p.is_dir()])
         self.person_to_id = {
             person_dir.name: i for i, person_dir in enumerate(self.person_dirs)

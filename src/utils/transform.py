@@ -2,7 +2,7 @@ import torch
 from torchvision.transforms import v2
 
 
-def get_transforms(img_size=640):
+def get_transforms(img_size=128):
     train_transform = v2.Compose(
         [
             v2.ToImage(),

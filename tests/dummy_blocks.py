@@ -1,24 +1,18 @@
+import torch
 from torch import nn
 
-class DummySSMBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super().__init__()
 
-        self.conv = nn.Conv1d(in_channels, out_channels, 3, padding=1)
-        self.norm = nn.BatchNorm1d(out_channels)
+class DummySSMBlock(nn.Module):
+    def __init__(self, embed_dim):
+        super().__init__()
+        self.linear = nn.Linear(embed_dim, embed_dim)
+        self.norm = nn.LayerNorm(embed_dim)
         self.act = nn.SiLU()
 
     def forward(self, x):
-        return self.act(self.norm(self.conv((x))))
-    
-class DummySSMBlocks(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.ssmblocks = nn.Sequential(
-            DummySSMBlock(24, 12),
-            DummySSMBlock(12, 6),
-            DummySSMBlock(6, 8),
-        )
+        return self.act(self.norm(self.linear(x)))
 
-    def forward(self, x):
-        return self.ssmblocks((x))
+
+class DummySSMBlocks(nn.ModuleList):
+    def __init__(self, num_blocks=4, embed_dim=128):
+        super().__init__([DummySSMBlock(embed_dim) for _ in range(num_blocks)])

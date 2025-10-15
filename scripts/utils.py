@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 
 
 def save_samples(imgs):
-
     try:
         save_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir  # type: ignore
         os.makedirs(save_dir, exist_ok=True)
