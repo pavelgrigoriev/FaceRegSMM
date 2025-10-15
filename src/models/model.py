@@ -31,11 +31,11 @@ class RecSSM(nn.Module):
         self.ssm_blocks = nn.ModuleList(
             [
                 Mamba2(d_model=embed_dim, d_state=64, d_conv=4, expand=2, headdim=32)
-                for _ in range(4)
+                for _ in range(6)
             ]
         )
 
-        self.norms = nn.ModuleList([nn.LayerNorm(embed_dim) for _ in range(4)])
+        self.norms = nn.ModuleList([nn.LayerNorm(embed_dim) for _ in range(6)])
 
         self.final_norm = nn.LayerNorm(embed_dim)
         self.head = nn.Linear(embed_dim, 128)
