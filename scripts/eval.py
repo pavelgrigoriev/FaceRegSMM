@@ -51,9 +51,7 @@ def main(cfg: DictConfig):
         torch.load(model_path, map_location=device)["model_state_dict"]
     )
     _, base_transform = get_transforms(img_size)
-    eval_dataset = PersonDataset(
-        os.path.join(data_path, "test"), base_transform, img_size=img_size
-    )
+    eval_dataset = PersonDataset(data_path, base_transform, img_size=img_size)
 
     log.info(f"Len eval_dataset: {len(eval_dataset)}")
 
