@@ -45,7 +45,8 @@ def main(cfg: DictConfig) -> None:
     num_workers = cfg["num_workers"]
     warmup_period = cfg["warmup_period"]
     eta_min = cfg["eta_min"]
-
+    margin = cfg["margin"]
+    patch_size = cfg["patch_size"]
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
@@ -54,7 +55,8 @@ def main(cfg: DictConfig) -> None:
     log.info(f"warmup_period: {warmup_period}")
     log.info(f"num_workers: {num_workers}")
     log.info(f"eta_min: {eta_min}")
-
+    log.info(f"margin: {margin}")
+    log.info(f"patch_size: {patch_size}")
     train_transform, base_transform = get_transforms(img_size)
 
     train_dataset = PersonDataset(
@@ -103,14 +105,14 @@ def main(cfg: DictConfig) -> None:
         prefetch_factor=4,
     )
 
-    model = RecSSM(img_size).to(device)
+    model = RecSSM(img_size, patch_size).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, epochs - warmup_period, eta_min=1e-6
     )
     warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
-    loss_fn = losses.TripletMarginLoss(margin=0.2)
-    miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
+    loss_fn = losses.TripletMarginLoss(margin=margin)
+    miner = miners.TripletMarginMiner(margin=margin, type_of_triplets="all")
 
     train_iter = iter(train_dataloader)
     imgs, _ = next(train_iter)
