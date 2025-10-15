@@ -80,7 +80,9 @@ def main(cfg: DictConfig) -> None:
     model = RecSSM(img_size).to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, epochs, eta_min=1e-6
+    )
     loss_fn = losses.TripletMarginLoss(margin=0.2)
     miner = miners.TripletMarginMiner(margin=0.2, type_of_triplets="all")
     train_iter = iter(train_dataloader)

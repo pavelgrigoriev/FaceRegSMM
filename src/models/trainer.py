@@ -2,6 +2,7 @@ import logging
 import os
 
 import hydra
+import tensorboard
 import torch
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
 from tqdm import tqdm
@@ -21,7 +22,6 @@ def train(
     device,
     patience=15,
 ):
-    count = 0
 
     best_val_metric = 0.0
     accuracy_calculator = AccuracyCalculator(
