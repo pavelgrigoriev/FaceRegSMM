@@ -1,5 +1,5 @@
 import logging
-import os
+from pathlib import Path
 
 import hydra
 import torch
@@ -32,6 +32,7 @@ def train(
         include=("precision_at_1", "r_precision", "mean_average_precision_at_r"),
         k="max_bin_count",
     )
+    count = 0
     for epoch in range(epochs):
         model.train()
         total_train_loss = 0.0
@@ -39,7 +40,7 @@ def train(
             train_dataloader, desc=f"Training... Epoch {epoch+1}/{epochs}", leave=False
         )
         for images, labels in train_progress_bar:
-            images, labels = images.to(device), labels
+            images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             embeddings = model(images)
             triplets = miner(embeddings, labels)
@@ -63,9 +64,9 @@ def train(
 
                 embeddings = model(images)
                 emb.append(embeddings.cpu())
-                lbs.append(labels)
+                lbs.append(labels.cpu())
 
-        val_embeddings = torch.cat(emb)
+        val_embeddings = torch.cat(emb).cpu()
         val_labels = torch.cat(lbs).cpu()
         val_embeddings = torch.nn.functional.normalize(val_embeddings, p=2, dim=1)
 
@@ -97,10 +98,7 @@ def train(
             best_val_metric = recall_at_1
             count = 0
             try:
-                save_path = os.path.join(
-                    hydra.core.hydra_config.HydraConfig.get().runtime.output_dir,  # type: ignore
-                    "best_model.pt",
-                )
+                save_path = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir) / "best_model.pt"  # type: ignore
                 torch.save(
                     {
                         "epoch": epoch,
@@ -113,7 +111,15 @@ def train(
                         "loss": avg_train_loss,
                         "patience": patience,
                         "warmup_period": warmup_period,
-                        "pathch_size": model.patch_embed.patch_size,
+                        "patch_size": model.patch_embed.patch_size,
+                        "img_size": model.patch_embed.img_size,
+                        "margin": loss_fn.margin,
+                        "model": model.__class__.__name__,
+                        "optimizer": optimizer.__class__.__name__,
+                        "loss_fn": loss_fn.__class__.__name__,
+                        "miner": miner.__class__.__name__,
+                        "scheduler": scheduler.__class__.__name__,
+                        "warmup_scheduler": warmup_scheduler.__class__.__name__,
                     },
                     save_path,
                 )

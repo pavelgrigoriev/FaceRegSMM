@@ -1,5 +1,5 @@
-data_path: ""
-model_path: ""
+data_path: null
+model_path: null
 batch_size: 32
 num_workers: 8
 img_size: 128

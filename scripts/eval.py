@@ -1,19 +1,18 @@
 import logging
-import os
 import sys
+from pathlib import Path
 
 import hydra
 import torch
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-project_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(project_dir)
+project_dir = Path(__file__).resolve().parents[1]
+sys.path.append(project_dir.as_posix())
 
 from scripts.utils import load_model
 from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
-from src.models.model import RecSSM
 from src.utils.transform import get_transforms
 
 log = logging.getLogger(__name__)
@@ -25,21 +24,27 @@ if device != "cuda":
 
 @hydra.main(
     version_base=None,
-    config_path=os.path.join(project_dir, "configs"),
+    config_path=str(project_dir / "configs"),
     config_name="eval",
 )
 def main(cfg: DictConfig):
-    data_path = cfg["data_path"]
-    if not os.path.exists(data_path):
+
+    data_path = cfg.get("data_path")
+    if not data_path:
+        data_path = Path(data_path)
+    if not data_path.exists():
         raise FileNotFoundError(f"data_path not found: {data_path}")
-    model_path = cfg["model_path"]
-    if not os.path.exists(model_path):
+
+    model_path = cfg.get("model_path")
+    if not model_path:
+        model_path = Path(model_path)
+    if not data_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
-    img_size = cfg["img_size"]
+    img_size = cfg.get("img_size")
 
-    batch_size = cfg["batch_size"]
-    num_workers = cfg["num_workers"]
+    batch_size = cfg.get("batch_size")
+    num_workers = cfg.get("num_workers")
 
     log.info(f"data_path: {data_path}")
     log.info(f"model_path: {model_path}")

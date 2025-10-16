@@ -1,6 +1,6 @@
 import logging
-import os
 import sys
+from pathlib import Path
 
 import hydra
 import pytorch_warmup as warmup
@@ -10,8 +10,9 @@ from pytorch_metric_learning import losses, miners
 from pytorch_metric_learning.samplers import MPerClassSampler
 from torch.utils.data import DataLoader
 
-project_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(project_dir)
+project_dir = Path(__file__).resolve().parents[1]
+sys.path.append(project_dir.as_posix())
+
 from scripts.utils import load_model, save_samples
 from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
@@ -30,24 +31,31 @@ log.info(f"Using device: {device}")
 
 @hydra.main(
     version_base=None,
-    config_path=os.path.join(project_dir, "configs"),
+    config_path=str(project_dir / "configs"),
     config_name="train",
 )
 def main(cfg: DictConfig) -> None:
-    data_path = cfg["data_path"]
-    if data_path == "":
-        raise ValueError("Please check your data path")
+    data_path = cfg.get("data_path")
+    if not data_path:
+        raise ValueError("data_path must be specified in the config file.")
+    data_path = Path(data_path)
+    if not data_path.exists():
+        raise FileNotFoundError(f"data_path not found: {data_path}")
 
-    epochs = cfg["epochs"]
-    batch_size = cfg["batch_size"]
-    img_size = cfg["img_size"]
-    lr = cfg["lr"]
-    num_workers = cfg["num_workers"]
-    warmup_period = cfg["warmup_period"]
-    eta_min = cfg["eta_min"]
-    margin = cfg["margin"]
-    patch_size = cfg["patch_size"]
-    model_path = cfg["model_path"]
+    epochs = cfg.get("epochs")
+    batch_size = cfg.get("batch_size")
+    img_size = cfg.get("img_size")
+    lr = cfg.get("lr")
+    num_workers = cfg.get("num_workers")
+    warmup_period = cfg.get("warmup_period")
+    eta_min = cfg.get("eta_min")
+    margin = cfg.get("margin")
+    patch_size = cfg.get("patch_size")
+    model_path = cfg.get("model_path")
+    if model_path:
+        model_path = Path(model_path)
+        if not model_path.exists():
+            raise FileNotFoundError(f"model_path not found: {model_path}")
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
@@ -60,9 +68,9 @@ def main(cfg: DictConfig) -> None:
     log.info(f"patch_size: {patch_size}")
     train_transform, base_transform = get_transforms(img_size)
 
-    train_dataset = PersonDataset(os.path.join(data_path, "train"), train_transform)
-    val_dataset = PersonDataset(os.path.join(data_path, "val"), base_transform)
-    test_dataset = PersonDataset(os.path.join(data_path, "test"), base_transform)
+    train_dataset = PersonDataset((data_path / "train"), train_transform)
+    val_dataset = PersonDataset((data_path / "val"), base_transform)
+    test_dataset = PersonDataset((data_path / "test"), base_transform)
 
     log.info(f"Len train_dataset: {len(train_dataset)}")
     log.info(f"Len test_dataset: {len(test_dataset)}")
@@ -100,8 +108,8 @@ def main(cfg: DictConfig) -> None:
         prefetch_factor=4,
     )
 
-    if model_path != "":
-        if not os.path.exists(model_path):
+    if model_path:
+        if not model_path.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
         model = load_model(model_path, img_size, device)
         log.info(f"Loaded model from {model_path}")
@@ -114,7 +122,6 @@ def main(cfg: DictConfig) -> None:
     warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
     loss_fn = losses.TripletMarginLoss(margin=margin)
     miner = miners.TripletMarginMiner(margin=margin, type_of_triplets="all")
-
     train_iter = iter(train_dataloader)
     imgs, _ = next(train_iter)
     save_samples(imgs)

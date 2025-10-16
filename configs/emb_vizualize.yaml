@@ -1,6 +1,6 @@
-data_path: ""
+data_path: null
 
-model_path: ""
+model_path: null
 img_size: 128
 hydra:
   run:

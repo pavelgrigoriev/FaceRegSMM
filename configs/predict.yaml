@@ -1,6 +1,6 @@
-first_img_path: ""
-second_img_path: ""
-model_path: ""
+first_img_path: null
+second_img_path: null
+model_path: null
 img_size: 128
 similarity_threshold: 0.5
 hydra:

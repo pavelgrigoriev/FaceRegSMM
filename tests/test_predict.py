@@ -1,11 +1,11 @@
-import os
 import sys
+from pathlib import Path
 
 import numpy as np
 import torch.nn.functional as F
 
-project_dir = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(project_dir)
+project_dir = Path(__file__).resolve().parents[1]
+sys.path.append(project_dir.as_posix())
 
 from dummy_blocks import DummySSMBlocks
 

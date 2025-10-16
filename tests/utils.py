@@ -1,8 +1,12 @@
 import random
+import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
+
+project_dir = Path(__file__).resolve().parents[1]
+sys.path.append(project_dir.as_posix())
 
 from src.constants import EXTENSION_LIST
 
