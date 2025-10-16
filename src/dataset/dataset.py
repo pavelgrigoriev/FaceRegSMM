@@ -7,6 +7,24 @@ from src.dataset.utils import load_image
 
 
 class PersonDataset(Dataset):
+    """Custom dataset for loading images of persons from a directory structure.
+    The directory structure should be as follows:
+    root/
+        person1/
+            img1.jpg
+            img2.jpg
+            ...
+        person2/
+            img1.jpg
+            img2.jpg
+            ...
+        ...
+    Each subdirectory represents a different person and contains images of that person.
+    Args:
+        root_dir (str or Path): Root directory containing person subdirectories.
+        transform (callable, optional): A function/transform to apply to the images.
+    """
+
     def __init__(self, root_dir, transform=None):
         self.root = Path(root_dir)
         self.transform = transform

@@ -24,7 +24,7 @@ if device != "cuda":
     config_path=str(project_dir / "configs"),
     config_name="predict",
 )
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     first_img_path = cfg.get("first_img_path")
     if not first_img_path:
         first_img_path = Path(first_img_path)

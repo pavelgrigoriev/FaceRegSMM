@@ -2,7 +2,13 @@ import torch
 from torchvision.transforms import v2
 
 
-def get_transforms(img_size=128):
+def get_transforms(img_size=128) -> tuple[v2.Compose, v2.Compose]:
+    """Get the training and base transformations for the dataset.
+    Args:
+        img_size (int, optional): Size to which the images will be resized. Defaults to 128.
+    Returns:
+        Tuple[torchvision.transforms.Compose, torchvision.transforms.Compose]: Training and base transformations.
+    """
     train_transform = v2.Compose(
         [
             v2.ToImage(),

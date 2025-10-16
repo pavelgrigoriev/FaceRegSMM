@@ -23,7 +23,25 @@ def train(
     warmup_period,
     device,
     patience=15,
-):
+) -> torch.nn.Module:
+    """
+    train the model and validate it on the validation dataset.
+    Args:
+        epochs (int): number of epochs to train the model.
+        model (torch.nn.Module): model to be trained.
+        train_dataloader (DataLoader): dataloader for the training dataset.
+        val_dataloader (DataLoader): dataloader for the validation dataset.
+        loss_fn (torch.nn.Module): loss function to be used.
+        miner (torch.nn.Module): miner to be used.
+        optimizer (torch.optim.Optimizer): optimizer to be used.
+        scheduler (torch.optim.lr_scheduler): learning rate scheduler to be used.
+        warmup_scheduler (pytorch_warmup.LinearWarmup): warmup scheduler to be used.
+        warmup_period (int): number of epochs for the warmup period.
+        device (str): device to be used for training. At on 16.10.2025 only 'cuda' is supported.
+        patience (int, optional): number of epochs to wait for improvement before early stopping. Defaults to 15.
+    Returns:
+        torch.nn.Module: trained model.
+    """
     writer = SummaryWriter(
         log_dir=hydra.core.hydra_config.HydraConfig.get().runtime.output_dir  # type: ignore
     )

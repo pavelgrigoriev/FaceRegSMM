@@ -27,7 +27,7 @@ if device != "cuda":
     config_path=str(project_dir / "configs"),
     config_name="eval",
 )
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
 
     data_path = cfg.get("data_path")
     if not data_path:

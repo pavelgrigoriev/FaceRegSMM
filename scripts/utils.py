@@ -12,7 +12,13 @@ from src.models.model import RecSSM
 log = logging.getLogger(__name__)
 
 
-def save_samples(imgs):
+def save_samples(imgs) -> None:
+    """Save a batch of sample images to the output directory.
+    Args:
+        imgs (torch.Tensor): Batch of images to be saved.
+    Returns:
+        None
+    """
     try:
         save_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)  # type: ignore
         save_dir.mkdir(parents=True, exist_ok=True)
@@ -30,7 +36,15 @@ def save_samples(imgs):
         raise RuntimeError(f"Error in saving sample images: {e}")
 
 
-def load_model(model_path, img_size, device):
+def load_model(model_path, img_size, device) -> RecSSM:
+    """
+    Load a trained model from a specified path.
+    Args:
+        model_path (Path): Path to the model file.
+        img_size (int): Size of the input images.
+        device (str): Device to load the model onto ('cpu' or 'cuda'). At on 16.10.2025 only 'cuda' is supported.
+    Returns:
+        RecSSM: Loaded model."""
     try:
         model_state_dict = torch.load(model_path, map_location=device)[
             "model_state_dict"

@@ -7,7 +7,16 @@ from tqdm import tqdm
 log = logging.getLogger(__name__)
 
 
-def evaluate(model, test_dataloader, device):
+def evaluate(model, test_dataloader, device) -> None:
+    """
+    Evaluate the model on the test dataset.
+    Args:
+        model (torch.nn.Module): model to be evaluated.
+        test_dataloader (DataLoader): dataloader for the test dataset.
+        device (str): device to be used for evaluation. At on 16.10.2025 only 'cuda' is supported.
+    Returns:
+        None
+    """
     model.eval()
     accuracy_calculator = AccuracyCalculator(
         include=("precision_at_1", "r_precision", "mean_average_precision_at_r"),

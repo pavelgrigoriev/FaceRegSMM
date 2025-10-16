@@ -35,7 +35,7 @@ log = logging.getLogger(__name__)
     config_path=str(project_dir / "configs"),
     config_name="emb_vizualize",
 )
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     data_path = cfg.get("data_path")
     if not data_path:
         data_path = Path(data_path)

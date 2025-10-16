@@ -4,6 +4,15 @@ from torch import nn
 
 
 class PatchEmbedding(nn.Module):
+    """
+    Image to Patch Embedding using Conv2d.
+    Args:
+        img_size (int): Size of the input image (assumed square).
+        patch_size (int): Size of each patch (assumed square).
+        in_channels (int): Number of input channels (e.g., 3 for RGB images).
+        embed_dim (int): Dimension of the embedding.
+    """
+
     def __init__(self, img_size, patch_size=16, in_channels=3, embed_dim=128):
         super().__init__()
         self.img_size = img_size
@@ -23,6 +32,14 @@ class PatchEmbedding(nn.Module):
 
 
 class RecSSM(nn.Module):
+    """
+    Recurrent SSM-based model for image embedding.
+    Args:
+        img_size (int): Size of the input image (assumed square).
+        patch_size (int): Size of each patch (assumed square).
+        embed_dim (int): Dimension of the embedding.
+    """
+
     def __init__(self, img_size=128, patch_size=16, embed_dim=128):
         super().__init__()
 
