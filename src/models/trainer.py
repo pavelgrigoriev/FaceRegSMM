@@ -86,9 +86,12 @@ def train(
         writer.add_scalar("R-Precision/Val", r_precision, epoch + 1)
         writer.add_scalar("MAP@R/Val", map_at_r, epoch + 1)
         writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], epoch + 1)
-        with warmup_scheduler.dampening():
-            if warmup_scheduler.last_step + 1 >= warmup_period:
-                scheduler.step()
+        if warmup_period > 0:
+            with warmup_scheduler.dampening():
+                if warmup_scheduler.last_step + 1 >= warmup_period:
+                    scheduler.step()
+        else:
+            scheduler.step()
 
         if recall_at_1 > best_val_metric:
             best_val_metric = recall_at_1
@@ -107,6 +110,10 @@ def train(
                         "map_at_r": map_at_r,
                         "r_precision": r_precision,
                         "lr": optimizer.param_groups[0]["lr"],
+                        "loss": avg_train_loss,
+                        "patience": patience,
+                        "warmup_period": warmup_period,
+                        "pathch_size": model.patch_embed.patch_size,
                     },
                     save_path,
                 )

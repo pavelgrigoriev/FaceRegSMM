@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
-from scripts.utils import save_samples
+from scripts.utils import load_model, save_samples
 from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
 from src.models.model import RecSSM
@@ -47,6 +47,7 @@ def main(cfg: DictConfig) -> None:
     eta_min = cfg["eta_min"]
     margin = cfg["margin"]
     patch_size = cfg["patch_size"]
+    model_path = cfg["model_path"]
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
@@ -59,15 +60,9 @@ def main(cfg: DictConfig) -> None:
     log.info(f"patch_size: {patch_size}")
     train_transform, base_transform = get_transforms(img_size)
 
-    train_dataset = PersonDataset(
-        os.path.join(data_path, "train"), train_transform, img_size
-    )
-    val_dataset = PersonDataset(
-        os.path.join(data_path, "val"), base_transform, img_size=img_size
-    )
-    test_dataset = PersonDataset(
-        os.path.join(data_path, "test"), base_transform, img_size=img_size
-    )
+    train_dataset = PersonDataset(os.path.join(data_path, "train"), train_transform)
+    val_dataset = PersonDataset(os.path.join(data_path, "val"), base_transform)
+    test_dataset = PersonDataset(os.path.join(data_path, "test"), base_transform)
 
     log.info(f"Len train_dataset: {len(train_dataset)}")
     log.info(f"Len test_dataset: {len(test_dataset)}")
@@ -105,7 +100,13 @@ def main(cfg: DictConfig) -> None:
         prefetch_factor=4,
     )
 
-    model = RecSSM(img_size, patch_size).to(device)
+    if model_path != "":
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+        model = load_model(model_path, img_size, device)
+        log.info(f"Loaded model from {model_path}")
+    else:
+        model = RecSSM(img_size, patch_size).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, epochs - warmup_period, eta_min=1e-6

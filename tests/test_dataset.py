@@ -5,12 +5,13 @@ import tempfile
 import numpy as np
 from torch.utils.data import DataLoader
 
+from utils import create_images
+
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
 from src.dataset.dataset import PersonDataset
 from src.utils.transform import get_transforms
-from utils import create_images
 
 
 def test_dataset():
@@ -18,7 +19,7 @@ def test_dataset():
     with tempfile.TemporaryDirectory() as temp_dir:
         create_images(temp_dir)
         batch_size = np.random.randint(1, 16)
-        dataset = PersonDataset(temp_dir, train_transform, 128)
+        dataset = PersonDataset(temp_dir, train_transform)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
         iterator = iter(dataloader)
         imgs, _ = next(iterator)

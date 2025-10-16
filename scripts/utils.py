@@ -7,6 +7,8 @@ import torchvision.utils as vutils
 from numpy import sqrt
 from PIL import Image
 
+from src.models.model import RecSSM
+
 log = logging.getLogger(__name__)
 
 
@@ -26,3 +28,11 @@ def save_samples(imgs):
         img_pil.save(os.path.join(save_dir, "imgs_batch.jpg"))
     except Exception as e:
         log.error(f"Error saving samples: {e}")
+
+
+def load_model(model_path, img_size, device):
+    model_state_dict = torch.load(model_path, map_location=device)["model_state_dict"]
+    path_size = torch.load(model_path, map_location=device)["pathch_size"]
+    model = RecSSM(img_size, path_size).to(device)
+    model.load_state_dict(model_state_dict)
+    return model

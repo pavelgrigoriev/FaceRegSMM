@@ -1,0 +1,7 @@
+data_path: ""
+
+model_path: ""
+img_size: 128
+hydra:
+  run:
+    dir: outputs/emb_vizualize/${now:%Y-%m-%d}/${now:%H-%M-%S}

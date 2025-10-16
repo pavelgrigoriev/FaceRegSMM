@@ -4,6 +4,8 @@ import tempfile
 
 from torch.utils.data import DataLoader
 
+from utils import create_images
+
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
@@ -13,7 +15,6 @@ from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
 from src.models.model import RecSSM
 from src.utils.transform import get_transforms
-from utils import create_images
 
 
 def test_evaluate():

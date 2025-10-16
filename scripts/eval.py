@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
+from scripts.utils import load_model
 from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
 from src.models.model import RecSSM
@@ -46,12 +47,9 @@ def main(cfg: DictConfig):
     log.info(f"batch_size: {batch_size}")
     log.info(f"num_workers: {num_workers}")
 
-    model = RecSSM(img_size).to(device)
-    model.load_state_dict(
-        torch.load(model_path, map_location=device)["model_state_dict"]
-    )
+    model = load_model(model_path, img_size, device)
     _, base_transform = get_transforms(img_size)
-    eval_dataset = PersonDataset(data_path, base_transform, img_size=img_size)
+    eval_dataset = PersonDataset(data_path, base_transform)
 
     log.info(f"Len eval_dataset: {len(eval_dataset)}")
 

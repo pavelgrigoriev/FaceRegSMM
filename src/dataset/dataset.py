@@ -2,17 +2,16 @@ from pathlib import Path
 
 from torch.utils.data import Dataset
 
+from src.constants import EXTENSION_LIST
 from src.dataset.utils import load_image
 
 
 class PersonDataset(Dataset):
-    def __init__(self, root_dir, transform=None, img_size=128):
+    def __init__(self, root_dir, transform=None):
         self.root = Path(root_dir)
         self.transform = transform
-        self.img_size = img_size
-        extension_list = ["PNG", "png", "jpeg", "JPEG", "jpg", "JPG"]
         self.paths = sorted(
-            [p for p in self.root.rglob("*") if p.suffix[1:] in extension_list]
+            [p for p in self.root.rglob("*") if p.suffix[1:] in EXTENSION_LIST]
         )
         self.person_dirs = sorted([p for p in self.root.iterdir() if p.is_dir()])
         self.person_to_id = {

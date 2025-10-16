@@ -7,6 +7,8 @@ import torch
 from pytorch_metric_learning import losses, miners
 from torch.utils.data import DataLoader
 
+from utils import create_images
+
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
@@ -18,7 +20,6 @@ from src.dataset.dataset import PersonDataset
 from src.models.model import RecSSM
 from src.models.trainer import train
 from src.utils.transform import get_transforms
-from utils import create_images
 
 
 def test_train():

@@ -10,6 +10,7 @@ from PIL import Image
 project_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(project_dir)
 
+from scripts.utils import load_model
 from src.models.model import RecSSM
 from src.models.predict import predict
 
@@ -37,10 +38,8 @@ def main(cfg: DictConfig):
     similarity_threshold = cfg["similarity_threshold"]
     first_img = Image.open(first_img_path).convert("RGB")
     second_img = Image.open(second_img_path).convert("RGB")
-    model = RecSSM(img_size).to(device)
-    model.load_state_dict(
-        torch.load(model_path, map_location=device)["model_state_dict"]
-    )
+
+    model = load_model(model_path, img_size, device)
 
     embedding1 = predict(first_img, model, img_size, device)
     embedding2 = predict(second_img, model, img_size, device)
