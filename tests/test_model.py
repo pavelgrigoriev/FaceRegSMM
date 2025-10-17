@@ -6,14 +6,11 @@ import torch
 project_dir = Path(__file__).resolve().parents[1]
 sys.path.append(project_dir.as_posix())
 
-from dummy_blocks import DummySSMBlocks
-
-from src.models.model import RecSSM
+from dummy_model import RecSSM
 
 
 def test_model():
     model = RecSSM(640)
-    model.ssm_blocks = DummySSMBlocks()  # type: ignore this need cause for ssm need only cuda
     sample_1 = torch.rand((1, 3, 640, 640))
     output_1 = model(sample_1)
     sample_2 = torch.rand((1, 3, 320, 320))

@@ -14,10 +14,9 @@ sys.path.append(project_dir.as_posix())
 
 from unittest import mock
 
-from dummy_blocks import DummySSMBlocks
+from dummy_model import RecSSM
 
 from src.dataset.dataset import PersonDataset
-from src.models.model import RecSSM
 from src.models.trainer import train
 from src.utils.transform import get_transforms
 
@@ -27,7 +26,6 @@ def test_train():
     with tempfile.TemporaryDirectory() as temp_train_dir:
         with tempfile.TemporaryDirectory() as temp_val_dir:
             model = RecSSM(640)
-            model.ssm_blocks = DummySSMBlocks()  # type: ignore
             create_images(temp_train_dir, num_img=5, num_trash_img=0)
             create_images(temp_val_dir, num_img=5, num_trash_img=0)
             batch_size = 1

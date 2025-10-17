@@ -9,11 +9,10 @@ from utils import create_images
 project_dir = Path(__file__).resolve().parents[1]
 sys.path.append(project_dir.as_posix())
 
-from dummy_blocks import DummySSMBlocks
+from dummy_model import RecSSM
 
 from src.dataset.dataset import PersonDataset
 from src.models.evaluate import evaluate
-from src.models.model import RecSSM
 from src.utils.transform import get_transforms
 
 
@@ -21,7 +20,6 @@ def test_evaluate():
     device = "cpu"
     with tempfile.TemporaryDirectory() as temp_test_dir:
         model = RecSSM(128)
-        model.ssm_blocks = DummySSMBlocks()  # type: ignore
         create_images(temp_test_dir, num_img=10, num_trash_img=0)
         batch_size = 1
         _, base_transform = get_transforms()

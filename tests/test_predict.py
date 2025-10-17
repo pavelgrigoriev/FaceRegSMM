@@ -7,16 +7,14 @@ import torch.nn.functional as F
 project_dir = Path(__file__).resolve().parents[1]
 sys.path.append(project_dir.as_posix())
 
-from dummy_blocks import DummySSMBlocks
+from dummy_model import RecSSM
 
-from src.models.model import RecSSM
 from src.models.predict import predict
 
 
 def test_predict():
     device = "cpu"
     model = RecSSM(640)
-    model.ssm_blocks = DummySSMBlocks()  # type: ignore
 
     first_img = np.random.randint(0, 256, (640, 640, 3), dtype=np.uint8)
     second_img = np.random.randint(0, 256, (640, 640, 3), dtype=np.uint8)
