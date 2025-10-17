@@ -11,6 +11,7 @@ warmup_period: 10
 epochs: 10
 batch_size: 32
 num_workers: 8
+patience: 10
 
 model_path: null
 

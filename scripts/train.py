@@ -57,6 +57,7 @@ def main(cfg: DictConfig) -> None:
         if not model_path.exists():
             raise FileNotFoundError(f"model_path not found: {model_path}")
     miner_type = cfg.get("miner_type")
+    patience = cfg.get("patience")
     log.info(f"data_path: {data_path}")
     log.info(f"epochs: {epochs}")
     log.info(f"batch_size: {batch_size}")
@@ -68,6 +69,7 @@ def main(cfg: DictConfig) -> None:
     log.info(f"margin: {margin}")
     log.info(f"patch_size: {patch_size}")
     log.info(f"miner_type: {miner_type}")
+    log.info(f"patience: {patience}")
     train_transform, base_transform = get_transforms(img_size)
 
     train_dataset = PersonDataset((data_path / "train"), train_transform)
@@ -143,6 +145,7 @@ def main(cfg: DictConfig) -> None:
         device,
         warmup_scheduler,
         warmup_period,
+        patience,
     )
 
     evaluate(model, test_dataloader, device)
