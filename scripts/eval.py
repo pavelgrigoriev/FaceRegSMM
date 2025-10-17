@@ -31,14 +31,18 @@ def main(cfg: DictConfig) -> None:
 
     data_path = cfg.get("data_path")
     if not data_path:
-        data_path = Path(data_path)
+        raise ValueError("data_path must be specified in the config file.")
+
+    data_path = Path(data_path)
     if not data_path.exists():
         raise FileNotFoundError(f"data_path not found: {data_path}")
 
     model_path = cfg.get("model_path")
     if not model_path:
-        model_path = Path(model_path)
-    if not data_path.exists():
+        raise ValueError("model_path must be specified in the config file.")
+    model_path = Path(model_path)
+
+    if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
     img_size = cfg.get("img_size")

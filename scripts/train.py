@@ -119,7 +119,10 @@ def main(cfg: DictConfig) -> None:
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer, epochs - warmup_period, eta_min=1e-6
     )
-    warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
+    if warmup_period > 0:
+        warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_period)
+    else:
+        warmup_scheduler = None
     loss_fn = losses.TripletMarginLoss(margin=margin)
     miner = miners.TripletMarginMiner(margin=margin, type_of_triplets="all")
     train_iter = iter(train_dataloader)
@@ -135,9 +138,9 @@ def main(cfg: DictConfig) -> None:
         miner,
         optimizer,
         scheduler,
+        device,
         warmup_scheduler,
         warmup_period,
-        device,
     )
 
     evaluate(model, test_dataloader, device)

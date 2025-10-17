@@ -60,7 +60,7 @@ def test_train():
                     miner,
                     optimizer,
                     scheduler,
+                    device,
                     warmup_scheduler,
                     1,
-                    device,
                 )

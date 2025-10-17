@@ -19,10 +19,10 @@ def train(
     miner,
     optimizer,
     scheduler,
-    warmup_scheduler,
-    warmup_period,
     device,
-    patience=15,
+    warmup_scheduler=None,
+    warmup_period=10,
+    patience=35,
 ) -> torch.nn.Module:
     """
     train the model and validate it on the validation dataset.
@@ -35,9 +35,9 @@ def train(
         miner (torch.nn.Module): miner to be used.
         optimizer (torch.optim.Optimizer): optimizer to be used.
         scheduler (torch.optim.lr_scheduler): learning rate scheduler to be used.
-        warmup_scheduler (pytorch_warmup.LinearWarmup): warmup scheduler to be used.
-        warmup_period (int): number of epochs for the warmup period.
         device (str): device to be used for training. At on 16.10.2025 only 'cuda' is supported.
+        warmup_scheduler (torch.optim.lr_scheduler, optional): warmup scheduler to be used. Defaults to None.
+        warmup_period (int, optional): number of epochs for warmup. Defaults to 10.
         patience (int, optional): number of epochs to wait for improvement before early stopping. Defaults to 15.
     Returns:
         torch.nn.Module: trained model.
@@ -105,7 +105,7 @@ def train(
         writer.add_scalar("R-Precision/Val", r_precision, epoch + 1)
         writer.add_scalar("MAP@R/Val", map_at_r, epoch + 1)
         writer.add_scalar("Learning Rate", optimizer.param_groups[0]["lr"], epoch + 1)
-        if warmup_period > 0:
+        if warmup_scheduler:
             with warmup_scheduler.dampening():
                 if warmup_scheduler.last_step + 1 >= warmup_period:
                     scheduler.step()

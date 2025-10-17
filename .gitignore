@@ -33,6 +33,7 @@ logs/
 results/
 *.log
 .pytest_cache
+*.bkp
 
 # ML / deep learning specific
 checkpoints/

@@ -1,16 +1,12 @@
 import base64
 import json
+import logging
 import sys
 from io import BytesIO
 from pathlib import Path
 
-from scripts.utils import load_model
-from src.constants import EXTENSION_LIST, HTML_TEMPLATE
-
 project_dir = Path(__file__).resolve().parents[1]
 sys.path.append(project_dir.as_posix())
-
-import logging
 
 import hydra
 import numpy as np
@@ -21,6 +17,8 @@ from PIL import Image
 from sklearn.manifold import TSNE
 from tqdm import tqdm
 
+from scripts.utils import load_model
+from src.constants import EXTENSION_LIST, HTML_TEMPLATE
 from src.models.predict import predict
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -38,7 +36,8 @@ log = logging.getLogger(__name__)
 def main(cfg: DictConfig) -> None:
     data_path = cfg.get("data_path")
     if not data_path:
-        data_path = Path(data_path)
+        raise ValueError("data_path must be specified in the config file.")
+    data_path = Path(data_path)
     if not data_path.exists():
         raise FileNotFoundError(f"data_path not found: {data_path}")
 
@@ -49,7 +48,9 @@ def main(cfg: DictConfig) -> None:
 
     model_path = cfg.get("model_path")
     if not model_path:
-        model_path = Path(model_path)
+        raise ValueError("model_path must be specified in the config file.")
+    model_path = Path(model_path)
+
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
@@ -69,7 +70,7 @@ def main(cfg: DictConfig) -> None:
 
     embeded = np.concatenate(emb_list, axis=0)
     log.info("Fitting TSNE")
-    model = TSNE(n_components=2, learning_rate="auto", init="pca", perplexity=30)
+    model = TSNE(n_components=2, learning_rate="auto", init="pca", perplexity=15)
     embeded = model.fit_transform(embeded)
     log.info("TSNE fit done")
 
@@ -103,7 +104,7 @@ def main(cfg: DictConfig) -> None:
     html_content = HTML_TEMPLATE.format(data_json=data_json)
 
     with open(
-        Path(HydraConfig.get().runtime.output_dir) / "emb_vizualize.html",  # type: ignore
+        Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir) / "emb_vizualize.html",  # type: ignore
         "w",
         encoding="utf-8",
     ) as f:

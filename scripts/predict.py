@@ -27,19 +27,22 @@ if device != "cuda":
 def main(cfg: DictConfig) -> None:
     first_img_path = cfg.get("first_img_path")
     if not first_img_path:
-        first_img_path = Path(first_img_path)
+        raise ValueError("first_img_path must be specified in the config file.")
+    first_img_path = Path(first_img_path)
     if not first_img_path.exists():
         raise FileNotFoundError(f"First image file not found: {first_img_path}")
 
     second_img_path = cfg.get("second_img_path")
     if not second_img_path:
-        second_img_path = Path(second_img_path)
+        raise ValueError("second_img_path must be specified in the config file.")
+    second_img_path = Path(second_img_path)
     if not second_img_path.exists():
         raise FileNotFoundError(f"Second image file not found: {second_img_path}")
 
     model_path = cfg.get("model_path")
     if not model_path:
-        model_path = Path(model_path)
+        raise ValueError("model_path must be specified in the config file.")
+    model_path = Path(model_path)
     if not model_path.exists():
         raise FileNotFoundError(f"Model file not found: {model_path}")
 
