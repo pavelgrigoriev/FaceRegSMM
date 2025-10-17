@@ -134,6 +134,7 @@ dependencies:
       - charset-normalizer==3.4.4
       - coverage==7.11.0
       - tensorboard
+      - faiss-cpu
       - einops==0.8.1
       - filelock==3.20.0
       - fsspec==2025.9.0
