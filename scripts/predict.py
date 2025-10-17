@@ -4,7 +4,6 @@ from pathlib import Path
 import hydra
 import torch
 import torch.nn.functional as F
-from altair import Fit
 from omegaconf import DictConfig
 from PIL import Image
 

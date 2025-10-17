@@ -1,3 +1,6 @@
+conda env create -f environment.yml
+
+
 https://www.kaggle.com/datasets/kapitanov/easyportrait
 https://github.com/NVlabs/ffhq-dataset?tab=readme-ov-file
 https://www.kaggle.com/datasets/vasukipatel/face-recognition-dataset

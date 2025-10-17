@@ -13,3 +13,5 @@ batch_size: 32
 num_workers: 8
 
 model_path: null
+
+miner_type: "all"
